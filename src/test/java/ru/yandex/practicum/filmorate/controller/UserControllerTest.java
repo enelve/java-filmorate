@@ -50,7 +50,7 @@ public class UserControllerTest {
                         .content(user)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.login", 
+                .andExpect(MockMvcResultMatchers.jsonPath("$.login",
                         Is.is("Логин не может быть пустым.")))
                 .andExpect(MockMvcResultMatchers.content()
                         .contentType(MediaType.APPLICATION_JSON));
@@ -69,7 +69,7 @@ public class UserControllerTest {
                         .content(user)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest())
-                .andExpect(MockMvcResultMatchers.jsonPath("$.birthday", 
+                .andExpect(MockMvcResultMatchers.jsonPath("$.birthday",
                         Is.is("Дата рождения не может быть в будущем")))
                 .andExpect(MockMvcResultMatchers.content()
                         .contentType(MediaType.APPLICATION_JSON));
