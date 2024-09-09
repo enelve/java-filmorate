@@ -20,7 +20,7 @@ public class FilmControllerTest {
     private MockMvc mockMvc;
 
     @Test
-    public void requestCreationValidFilm() throws Exception {
+    void requestCreationValidFilm() throws Exception {
         String film = "{\n" +
                 "    \"id\": 2,\n" +
                 "    \"name\": \"name\",\n" +
@@ -38,7 +38,7 @@ public class FilmControllerTest {
     }
 
     @Test
-    public void requestCreationEmptyName() throws Exception {
+    void requestCreationEmptyName() throws Exception {
         String film = "{\n" +
                 "    \"id\": 2,\n" +
                 "    \"name\": \"\",\n" +
@@ -57,7 +57,7 @@ public class FilmControllerTest {
     }
 
     @Test
-    public void requestCreationInvalidReleaseDate() throws Exception {
+    void requestCreationInvalidReleaseDate() throws Exception {
         String film = "{\n" +
                 "    \"id\": 2,\n" +
                 "    \"name\": \"name\",\n" +
@@ -76,7 +76,7 @@ public class FilmControllerTest {
     }
 
     @Test
-    public void requestCreationInvalidDescription() throws Exception {
+    void requestCreationInvalidDescription() throws Exception {
         String longDescription = "a".repeat(201);
         String film = "{\n" +
                 "    \"id\": 2,\n" +

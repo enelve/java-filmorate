@@ -12,7 +12,7 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 @WebMvcTest
 @AutoConfigureMockMvc
-public class UserControllerTest {
+class UserControllerTest {
     @Autowired
     UserController userController;
 
@@ -20,7 +20,7 @@ public class UserControllerTest {
     private MockMvc mockMvc;
 
     @Test
-    public void requestCreationValidUser() throws Exception {
+    void requestCreationValidUser() throws Exception {
         String user = "{\n" +
                 "  \"login\": \"user\",\n" +
                 "  \"name\": \"name\",\n" +
@@ -38,9 +38,9 @@ public class UserControllerTest {
     }
 
     @Test
-    public void requestCreationEmptyLogin() throws Exception {
+    void requestCreationEmptyLogin() throws Exception {
         String user = "{\n" +
-                "  \"login\": \"\",\n" +
+                "  \"login\": \"         \",\n" +
                 "  \"name\": \"name\",\n" +
                 "  \"id\": 1,\n" +
                 "  \"email\": \"email@email.email\",\n" +
@@ -51,13 +51,13 @@ public class UserControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isBadRequest())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.login",
-                        Is.is("Логин не может содержать пробелы")))
+                        Is.is("Логин не может быть пустым.")))
                 .andExpect(MockMvcResultMatchers.content()
                         .contentType(MediaType.APPLICATION_JSON));
     }
 
     @Test
-    public void requestCreationInvalidBirthday() throws Exception {
+    void requestCreationInvalidBirthday() throws Exception {
         String user = "{\n" +
                 "  \"login\": \"user\",\n" +
                 "  \"name\": \"name\",\n" +
@@ -76,7 +76,7 @@ public class UserControllerTest {
     }
 
     @Test
-    public void requestCreationInvalidEmail() throws Exception {
+    void requestCreationInvalidEmail() throws Exception {
         String user = "{\n" +
                 "  \"login\": \"user\",\n" +
                 "  \"name\": \"name\",\n" +
