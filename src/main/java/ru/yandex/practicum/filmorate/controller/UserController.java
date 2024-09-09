@@ -12,7 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-@RestController()
+@RestController
 @RequestMapping("/users")
 @Slf4j
 public class UserController {

@@ -11,7 +11,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
-@RestController()
+@RestController
 @RequestMapping("/films")
 @Slf4j
 public class FilmController {
