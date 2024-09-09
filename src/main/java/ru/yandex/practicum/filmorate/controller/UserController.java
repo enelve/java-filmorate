@@ -2,7 +2,9 @@ package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.HttpClientErrorException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 
@@ -25,6 +27,10 @@ public class UserController {
 
     @PostMapping()
     public User create(@Valid @RequestBody User user) {
+        if (users.containsKey(user.getId())) {
+            log.info("Пользователь с Id = {} уже есть.", user.getId());
+            throw new HttpClientErrorException(HttpStatus.BAD_REQUEST);
+        }
         user.setId(generateId());
         user.setName(Optional.ofNullable(user.getName()).orElse(user.getLogin()));
         users.put(user.getId(), user);
@@ -41,12 +47,12 @@ public class UserController {
             users.put(user.getId(), user);
             log.info("Изменена информация о пользователе: {}", user.getName());
         } else {
-            throw new NotFoundException("Не существующий пользователь.");
+            throw new HttpClientErrorException(HttpStatus.NO_CONTENT);
         }
         return user;
     }
 
     private int generateId() {
-        return id++;
+        return ++id;
     }
 }
