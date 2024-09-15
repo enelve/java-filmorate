@@ -1,57 +1,60 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.Valid;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.client.HttpClientErrorException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.List;
 
 @RestController
 @RequestMapping("/users")
-@Slf4j
 public class UserController {
-    private final Map<Integer, User> users = new HashMap<>();
-    private int id = 0;
 
-    @GetMapping()
-    public Collection<User> findAll() {
-        return users.values();
+    private final UserService userService;
+
+    public UserController(UserService userService) {
+        this.userService = userService;
     }
 
-    @PostMapping()
+    @GetMapping
+    public Collection<User> getAll() {
+        return userService.getAll();
+    }
+
+    @PostMapping
     public User create(@Valid @RequestBody User user) {
-        if (users.containsKey(user.getId())) {
-            log.info("Пользователь с Id = {} уже есть.", user.getId());
-            throw new HttpClientErrorException(HttpStatus.BAD_REQUEST);
-        }
-        user.setId(generateId());
-        user.setName(Optional.ofNullable(user.getName()).orElse(user.getLogin()));
-        users.put(user.getId(), user);
-        log.info("Добавлена информация о новом пользователе: {}", user.getName());
-        return user;
+        return userService.add(user);
     }
 
-    @PutMapping()
+    @PutMapping
     public User update(@Valid @RequestBody User user) {
-        if (users.containsKey(user.getId())) {
-            if (user.getName().isBlank()) {
-                user.setName(user.getLogin());
-            }
-            users.put(user.getId(), user);
-            log.info("Изменена информация о пользователе: {}", user.getName());
-        } else {
-            throw new HttpClientErrorException(HttpStatus.NO_CONTENT);
-        }
-        return user;
+        return userService.update(user);
     }
 
-    private int generateId() {
-        return ++id;
+    @GetMapping("/{id}")
+    public User getUserById(@PathVariable Integer id) {
+        return userService.getUserById(id);
+    }
+
+    @PutMapping("/{id}/friends/{friendId}")
+    public User addFriend(@PathVariable Integer id, @PathVariable Integer friendId) {
+        return userService.addFriend(id, friendId);
+    }
+
+    @DeleteMapping("/{id}/friends/{friendId}")
+    public User removeFriend(@PathVariable Integer id, @PathVariable Integer friendId) {
+        return userService.removeFriend(id, friendId);
+    }
+
+    @GetMapping("/{id}/friends")
+    public List<User> getFriends(@PathVariable Integer id) {
+        return userService.getFriends(id);
+    }
+
+    @GetMapping("/{id}/friends/common/{otherId}")
+    public List<User> getCommonFriends(@PathVariable Integer id, @PathVariable Integer otherId) {
+        return userService.getCommonFriends(id, otherId);
     }
 }
