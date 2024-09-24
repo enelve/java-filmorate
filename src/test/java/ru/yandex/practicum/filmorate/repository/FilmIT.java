@@ -62,7 +62,7 @@ public class FilmIT {
 
     @org.junit.jupiter.api.Test
     public void getPopularFilm() {
-        User user = userService.add(getTestUser("email","login"));
+        User user = userService.add(getTestUser("email", "login"));
         Film film1 = filmService.add(getTestFilm("film1"));
         Film film2 = filmService.add(getTestFilm("film2"));
         Film film3 = filmService.add(getTestFilm("film3"));
@@ -74,8 +74,8 @@ public class FilmIT {
 
     @org.junit.jupiter.api.Test
     public void likeRemoved() {
-        User user1 = userService.add(getTestUser("email1","login1"));
-        User user2 = userService.add(getTestUser("email2","login2"));
+        User user1 = userService.add(getTestUser("email1", "login1"));
+        User user2 = userService.add(getTestUser("email2", "login2"));
         Film film2 = filmService.add(getTestFilm("film1"));
         Film film1 = filmService.add(getTestFilm("film1"));
         filmService.addLike(film1.getId(), user1.getId());
@@ -87,11 +87,12 @@ public class FilmIT {
         assertEquals(film2.getId(), filmService.getMostPopular(1).get(0).getId());
     }
 
-    private void cleanUpDatabase(){
+    private void cleanUpDatabase() {
         jdbcTemplate.execute("DELETE FROM films");
         jdbcTemplate.execute("DELETE FROM users");
         jdbcTemplate.execute("DELETE FROM likes");
     }
+
     private User getTestUser(String email, String login) {
         return new User(null, email, login, "name", LocalDate.now().minusYears(20));
     }
