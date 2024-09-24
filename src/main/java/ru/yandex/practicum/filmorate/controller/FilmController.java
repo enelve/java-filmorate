@@ -3,6 +3,8 @@ package ru.yandex.practicum.filmorate.controller;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.dto.FilmDto;
+import ru.yandex.practicum.filmorate.mapper.FilmMapper;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
@@ -16,37 +18,39 @@ public class FilmController {
     private final FilmService filmService;
 
     @GetMapping
-    public Collection<Film> returnAll() {
-        return filmService.getAll();
+    public Collection<FilmDto> returnAll() {
+        return filmService.getAll().stream().map(FilmMapper::toDto).toList();
     }
 
     @PostMapping
-    public Film create(@Valid @RequestBody Film film) {
-        return filmService.add(film);
+    public FilmDto create(@Valid @RequestBody FilmDto filmDto) {
+        Film film = FilmMapper.toEntity(filmDto);
+        return FilmMapper.toDto(filmService.add(film));
     }
 
     @PutMapping
-    public Film update(@Valid @RequestBody Film film) {
-        return filmService.update(film);
+    public FilmDto update(@Valid @RequestBody FilmDto filmDto) {
+        Film film = FilmMapper.toEntity(filmDto);
+        return FilmMapper.toDto(filmService.update(film));
     }
 
     @GetMapping("/{id}")
-    public Film getFilmById(@PathVariable Integer id) {
-        return filmService.getFilmById(id);
+    public FilmDto getFilmById(@PathVariable Integer id) {
+        return FilmMapper.toDto(filmService.getById(id));
     }
 
     @PutMapping("/{id}/like/{userId}")
-    public Film addLike(@PathVariable Integer id, @PathVariable Integer userId) {
-        return filmService.addLike(id, userId);
+    public FilmDto addLike(@PathVariable Integer id, @PathVariable Integer userId) {
+        return FilmMapper.toDto(filmService.addLike(id, userId));
     }
 
     @DeleteMapping("{id}/like/{userId}")
-    public Film deleteLike(@PathVariable Integer id, @PathVariable Integer userId) {
-        return filmService.deleteLike(id, userId);
+    public FilmDto deleteLike(@PathVariable Integer id, @PathVariable Integer userId) {
+        return FilmMapper.toDto(filmService.deleteLike(id, userId));
     }
 
     @GetMapping("/popular")
-    public Collection<Film> getMostPopular(@RequestParam(defaultValue = "10") Integer count) {
-        return filmService.getMostPopular(count);
+    public Collection<FilmDto> getMostPopular(@RequestParam(defaultValue = "10") Integer count) {
+        return filmService.getMostPopular(count).stream().map(FilmMapper::toDto).toList();
     }
 }

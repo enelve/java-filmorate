@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import org.hamcrest.core.Is;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -9,24 +10,26 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
 
 @SpringBootTest
 @AutoConfigureMockMvc
 class FilmControllerTest {
     @Autowired
     FilmController filmController;
-
     @Autowired
     private MockMvc mockMvc;
+
 
     @Test
     void requestCreationValidFilm() throws Exception {
         String film = "{\n" +
-                "    \"id\": 2,\n" +
                 "    \"name\": \"name\",\n" +
                 "    \"description\": \"description\",\n" +
                 "    \"releaseDate\": \"1970-01-01\",\n" +
-                "    \"duration\": 200\n" +
+                "    \"duration\": 200,\n" +
+                "    \"mpa\": { \"id\": 1}\n" +
                 "}";
 
         mockMvc.perform(MockMvcRequestBuilders.post("/films")
