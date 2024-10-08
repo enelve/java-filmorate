@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.exception;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
@@ -13,8 +14,7 @@ import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
-import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.HttpStatus.*;
 
 @ControllerAdvice
 @Slf4j
@@ -34,7 +34,7 @@ public class RestExceptionHandler extends ExceptionHandlerExceptionResolver {
                 .body(errors);
     }
 
-    @ExceptionHandler(NotFoundException.class)
+    @ExceptionHandler({NotFoundException.class, EmptyResultDataAccessException.class})
     public ResponseEntity<ErrorResponse> handleException(NotFoundException e) {
         log.error(e.getMessage());
         ErrorResponse response = new ErrorResponse(NOT_FOUND.value(), e.getMessage(), LocalDateTime.now());
@@ -49,6 +49,15 @@ public class RestExceptionHandler extends ExceptionHandlerExceptionResolver {
         ErrorResponse response = new ErrorResponse(BAD_REQUEST.value(), e.getMessage(), LocalDateTime.now());
         return ResponseEntity
                 .status(BAD_REQUEST)
+                .body(response);
+    }
+
+    @ExceptionHandler(NotContentException.class)
+    public ResponseEntity<ErrorResponse> handleException(NotContentException e) {
+        log.error(e.getMessage());
+        ErrorResponse response = new ErrorResponse(NO_CONTENT.value(), e.getMessage(), LocalDateTime.now());
+        return ResponseEntity
+                .status(NO_CONTENT)
                 .body(response);
     }
 }

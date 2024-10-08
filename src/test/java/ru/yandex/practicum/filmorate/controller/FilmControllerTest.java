@@ -15,18 +15,18 @@ import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 class FilmControllerTest {
     @Autowired
     FilmController filmController;
-
     @Autowired
     private MockMvc mockMvc;
+
 
     @Test
     void requestCreationValidFilm() throws Exception {
         String film = "{\n" +
-                "    \"id\": 2,\n" +
                 "    \"name\": \"name\",\n" +
                 "    \"description\": \"description\",\n" +
                 "    \"releaseDate\": \"1970-01-01\",\n" +
-                "    \"duration\": 200\n" +
+                "    \"duration\": 200,\n" +
+                "    \"mpa\": { \"id\": 1}\n" +
                 "}";
 
         mockMvc.perform(MockMvcRequestBuilders.post("/films")
