@@ -120,4 +120,14 @@ public class FilmService {
                 .limit(count)
                 .toList();
     }
+
+    public void delete(Integer id) {
+        log.debug("Удаление фильма {}.", id);
+        if (!filmRepository.exists(id)) {
+            log.error("Фильм с Id={} не найден!", id);
+            throw new NotFoundException(String.format(ERROR_0001.message(), id));
+        }
+        filmRepository.delete(id);
+        log.debug("Фильм {} удален.", id);
+    }
 }

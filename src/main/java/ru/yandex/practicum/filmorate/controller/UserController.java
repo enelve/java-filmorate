@@ -59,4 +59,9 @@ public class UserController {
     public List<UserDto> getCommonFriends(@PathVariable Integer id, @PathVariable Integer otherId) {
         return userService.getCommonFriends(id, otherId).stream().map(UserMapper::toDto).toList();
     }
+
+    @DeleteMapping("{id}")
+    public void delete(@PathVariable Integer id) {
+        userService.delete(id);
+    }
 }

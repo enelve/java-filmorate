@@ -11,7 +11,7 @@ public interface FilmRepository {
 
     Film update(Film film);
 
-    Film delete(Integer id);
+    void delete(Integer id);
 
     Collection<Film> getAll();
 

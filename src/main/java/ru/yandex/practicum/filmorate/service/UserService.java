@@ -113,4 +113,14 @@ public class UserService {
                 .map(Map.Entry::getKey)
                 .toList();
     }
+
+    public void delete(Integer id) {
+        log.info("Удаление пользователя {}", id);
+        if (!userRepository.exists(id)) {
+            log.error("Пользователь с Id={} не найден!", id);
+            throw new NotFoundException(String.format(ERROR_0001.message(), id));
+        }
+        userRepository.delete(id);
+        log.debug("Пользователь {} удален.", id);
+    }
 }

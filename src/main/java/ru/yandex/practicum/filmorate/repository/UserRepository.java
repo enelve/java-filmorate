@@ -9,7 +9,7 @@ public interface UserRepository {
 
     User update(User user);
 
-    User delete(Integer id);
+    void delete(Integer id);
 
     Collection<User> getAll();
 
