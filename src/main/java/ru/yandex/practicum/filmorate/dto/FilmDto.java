@@ -5,11 +5,13 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.FilmRating;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.validator.ValidReleaseDate;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
 
 public record FilmDto(
@@ -25,6 +27,7 @@ public record FilmDto(
         @NotNull
         @JsonProperty("mpa")
         FilmRating filmRating,
-        Set<Genre> genres
+        Set<Genre> genres,
+        List<Director> directors
 ) {
 }

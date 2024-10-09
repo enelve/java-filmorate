@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.repository.impl;
 
+import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -8,6 +9,8 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
+import ru.yandex.practicum.filmorate.mapper.FilmDirectorMapper;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.repository.FilmRepository;
@@ -25,6 +28,7 @@ import java.util.*;
 @RequiredArgsConstructor
 public class FilmDatabaseRepository implements FilmRepository {
     private final JdbcTemplate jdbcTemplate;
+    private final DirectorDatabaseRepository directorDatabaseRepository;
 
     @Override
     public Film add(Film film) {
@@ -42,6 +46,8 @@ public class FilmDatabaseRepository implements FilmRepository {
         }, keyHolder);
 
         film.setId(keyHolder.getKey().intValue());
+        List<Director> directors = directorDatabaseRepository.addDirectorInFilm(film.getId(), film.getDirectors());
+        film.setDirectors(directors);
         return film;
     }
 
@@ -93,6 +99,31 @@ public class FilmDatabaseRepository implements FilmRepository {
     @Override
     public void deleteGenres(Integer filmId) {
         jdbcTemplate.update("DELETE FROM film_genre WHERE film_id=?", filmId);
+    }
+
+    @Override
+    public List<Film> getDirectorFilms(int directorId, String sortBy) {
+        String sql;
+        switch (sortBy) {
+            case "year":
+                sql = "SELECT f.*, d.director_id, d.director_name FROM film_director fd " +
+                        "JOIN films f ON fd.film_id = f.film_id " +
+                        "JOIN director d ON d.director_id = fd.director_id " +
+                        "WHERE fd.director_id=? ORDER BY f.release_date";
+                break;
+            case "likes":
+                  sql = "SELECT f.*, d.director_id, d.director_name, COUNT(l.USER_ID) FROM films f " +
+                          "JOIN FILM_DIRECTOR fd ON fd.FILM_ID = f.FILM_ID  " +
+                          "JOIN DIRECTOR d ON d.DIRECTOR_ID = fd.DIRECTOR_ID " +
+                          "JOIN LIKES l ON f.FILM_ID = l.FILM_ID " +
+                          "WHERE fd.director_id=? GROUP BY l.film_id " +
+                          "ORDER BY COUNT (l.user_id) DESC";
+                break;
+            default:
+                log.info("Запрашиваемой сортировки не существует: {}", sortBy);
+                throw new ValidationException("Не корректный параметр сортировки");
+        }
+        return jdbcTemplate.query(sql, new FilmDirectorMapper(), directorId);
     }
 
     @Override

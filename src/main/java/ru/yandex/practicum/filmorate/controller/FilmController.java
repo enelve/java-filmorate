@@ -9,6 +9,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import java.util.Collection;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -52,5 +53,10 @@ public class FilmController {
     @GetMapping("/popular")
     public Collection<FilmDto> getMostPopular(@RequestParam(defaultValue = "10") Integer count) {
         return filmService.getMostPopular(count).stream().map(FilmMapper::toDto).toList();
+    }
+
+    @GetMapping("/director/{directorId}")
+    public List<Film> getDirectors(@PathVariable int directorId, @RequestParam String sortBy) {
+        return filmService.getDirectors(directorId, sortBy);
     }
 }
