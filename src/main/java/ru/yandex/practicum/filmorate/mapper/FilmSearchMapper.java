@@ -15,6 +15,7 @@ import java.util.Set;
 public class FilmSearchMapper implements RowMapper<FilmSearch> {
     private final DirectorMapper directorMapper = new DirectorMapper();
     private final GenreMapper genreMapper = new GenreMapper();
+
     @Override
     public FilmSearch mapRow(ResultSet rs, int rowNum) throws SQLException {
 
@@ -30,7 +31,7 @@ public class FilmSearchMapper implements RowMapper<FilmSearch> {
         film.setMpa(filmRating);
         List<Director> directors = new ArrayList<>();
         int directorId = rs.getInt("director_id");
-        if(directorId != 0) {
+        if (directorId != 0) {
             Director director = directorMapper.mapRow(rs, rowNum);
             directors.add(director);
         }
