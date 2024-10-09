@@ -90,11 +90,12 @@ class FilmIT {
         filmService.add(getTestFilm("film4", LocalDate.now().minusYears(10), Set.of()));
         filmService.getAll().forEach(film -> filmService.addLike(film.getId(), user.getId()));
 
-        List<Film> mostPopular = filmService.getMostPopularByGenreAndYear(4, Optional.empty(), Optional.of(2014));
+        List<Film> mostPopular = filmService.getMostPopularByGenreAndYear(Integer.MAX_VALUE,
+                Optional.of(genre.getId()),
+                Optional.of(2014));
 
-        assertEquals(2, mostPopular.size());
+        assertEquals(1, mostPopular.size());
         assertEquals("film2", mostPopular.get(0).getName());
-        assertEquals("film4", mostPopular.get(1).getName());
     }
 
     @Test

@@ -125,7 +125,7 @@ public class FilmService {
             return genreMatched && yearMatched;
         };
 
-        return filmRepository.getAll().stream()
+        return getAll().stream()
                 .filter(filmPredicate)
                 .sorted(((o1, o2) -> likeRepository.getCount(o2.getId()) - likeRepository.getCount(o1.getId())))
                 .limit(count)
