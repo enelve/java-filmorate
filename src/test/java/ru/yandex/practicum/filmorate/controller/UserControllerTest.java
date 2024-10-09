@@ -93,4 +93,26 @@ class UserControllerTest {
                 .andExpect(MockMvcResultMatchers.content()
                         .contentType(MediaType.APPLICATION_JSON));
     }
+
+    @Test
+    void deleteExistingReturnsSuccess() throws Exception {
+        String user = "{\n" +
+                "  \"login\": \"user\",\n" +
+                "  \"name\": \"name\",\n" +
+                "  \"id\": 1,\n" +
+                "  \"email\": \"email@email.email\",\n" +
+                "  \"birthday\": \"1970-01-01\"\n" +
+                "}";
+        mockMvc.perform(MockMvcRequestBuilders.post("/users")
+                .content(user)
+                .contentType(MediaType.APPLICATION_JSON));
+        mockMvc.perform(MockMvcRequestBuilders.delete("/users/1"))
+                .andExpect(MockMvcResultMatchers.status().isOk());
+    }
+
+    @Test
+    void deleteNotExistingReturnsNotFound() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.delete("/users/1"))
+                .andExpect(MockMvcResultMatchers.status().isNotFound());
+    }
 }

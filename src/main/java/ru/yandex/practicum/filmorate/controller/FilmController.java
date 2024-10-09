@@ -55,6 +55,11 @@ public class FilmController {
         return filmService.getMostPopular(count).stream().map(FilmMapper::toDto).toList();
     }
 
+    @DeleteMapping("{id}")
+    public void deleteFilm(@PathVariable Integer id) {
+        filmService.delete(id);
+    }
+
     @GetMapping("/director/{directorId}")
     public List<Film> getDirectors(@PathVariable int directorId, @RequestParam String sortBy) {
         return filmService.getDirectors(directorId, sortBy);
