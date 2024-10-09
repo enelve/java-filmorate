@@ -1,14 +1,12 @@
 package ru.yandex.practicum.filmorate.repository;
 
+import org.junit.jupiter.api.AfterEach;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import ru.yandex.practicum.filmorate.model.Director;
-import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.FilmRating;
 import ru.yandex.practicum.filmorate.service.DirectorService;
-import ru.yandex.practicum.filmorate.service.FilmService;
 
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -18,11 +16,14 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 @AutoConfigureTestDatabase
 public class DirectorIT {
     @Autowired
-    FilmService filmService;
-    @Autowired
     DirectorService directorService;
     @Autowired
     JdbcTemplate jdbcTemplate;
+
+    @AfterEach
+    void afterEach() {
+        cleanUpDatabase();
+    }
 
     @org.junit.jupiter.api.Test
     public void directorCreated() {
