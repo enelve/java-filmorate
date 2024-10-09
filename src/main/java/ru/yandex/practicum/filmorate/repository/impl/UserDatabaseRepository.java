@@ -50,8 +50,8 @@ public class UserDatabaseRepository implements UserRepository {
     }
 
     @Override
-    public User delete(Integer id) {
-        return null;
+    public void delete(Integer id) {
+        jdbcTemplate.update("DELETE FROM users WHERE user_id=?", id);
     }
 
     @Override

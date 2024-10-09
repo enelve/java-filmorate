@@ -61,11 +61,6 @@ public class FilmDatabaseRepository implements FilmRepository {
     }
 
     @Override
-    public Film delete(Integer id) {
-        return null;
-    }
-
-    @Override
     public Collection<Film> getAll() {
         Collection<Film> films = jdbcTemplate.query(
                 "SELECT film_id, name, description, release_date, duration, film_rating_id FROM films", new FilmMapper()
@@ -81,6 +76,11 @@ public class FilmDatabaseRepository implements FilmRepository {
                 id
         );
         return filmFromDB;
+    }
+
+    @Override
+    public void delete(Integer id) {
+        jdbcTemplate.update("DELETE FROM films WHERE film_id=?", id);
     }
 
     @Override

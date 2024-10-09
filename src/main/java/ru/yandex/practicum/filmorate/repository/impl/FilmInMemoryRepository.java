@@ -36,8 +36,8 @@ public class FilmInMemoryRepository implements FilmRepository {
     }
 
     @Override
-    public Film delete(Integer id) {
-        return filmMap.remove(id);
+    public void delete(Integer id) {
+        filmMap.remove(id);
     }
 
     @Override

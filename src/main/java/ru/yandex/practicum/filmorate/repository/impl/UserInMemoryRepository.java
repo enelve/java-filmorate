@@ -28,8 +28,8 @@ public class UserInMemoryRepository implements UserRepository {
     }
 
     @Override
-    public User delete(Integer id) {
-        return users.remove(id);
+    public void delete(Integer id) {
+        users.remove(id);
     }
 
     @Override

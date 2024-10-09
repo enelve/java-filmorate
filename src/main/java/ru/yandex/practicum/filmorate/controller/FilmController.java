@@ -53,4 +53,9 @@ public class FilmController {
     public Collection<FilmDto> getMostPopular(@RequestParam(defaultValue = "10") Integer count) {
         return filmService.getMostPopular(count).stream().map(FilmMapper::toDto).toList();
     }
+
+    @DeleteMapping("{id}")
+    public void delete(@PathVariable Integer id) {
+        filmService.delete(id);
+    }
 }
