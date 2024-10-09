@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.repository.impl;
 
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.FilmSearch;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.repository.FilmRepository;
 
@@ -71,6 +72,11 @@ public class FilmInMemoryRepository implements FilmRepository {
 
     @Override
     public List<Film> getDirectorFilms(int directorId, String sortBy) {
+        return List.of();
+    }
+
+    @Override
+    public List<FilmSearch> getFilmBySearch(String query, String by) {
         return List.of();
     }
 }

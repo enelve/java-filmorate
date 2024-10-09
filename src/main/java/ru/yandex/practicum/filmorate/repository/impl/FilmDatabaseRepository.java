@@ -10,8 +10,10 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.mapper.FilmDirectorMapper;
+import ru.yandex.practicum.filmorate.mapper.FilmSearchMapper;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.FilmSearch;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.repository.FilmRepository;
 import ru.yandex.practicum.filmorate.repository.mapper.FilmMapper;
@@ -124,6 +126,32 @@ public class FilmDatabaseRepository implements FilmRepository {
                 throw new ValidationException("Не корректный параметр сортировки");
         }
         return jdbcTemplate.query(sql, new FilmDirectorMapper(), directorId);
+    }
+
+    @Override
+    public List<FilmSearch> getFilmBySearch(String query, String by) {
+        StringBuilder sql = new StringBuilder("SELECT f.*, d.*, g.*, fr.RATING_VALUE "
+            + "FROM films f "
+            + "LEFT JOIN likes ml ON f.film_id = ml.film_id "
+            + "LEFT JOIN film_genre fg ON fg.FILM_ID = f.FILM_ID "
+            + "LEFT JOIN genre g ON g.genre_id = fg.GENRE_ID  "
+            + "LEFT JOIN film_director fd ON f.film_id = fd.film_id "
+            + "LEFT JOIN film_rating fr ON fr.film_rating_id = f.film_id "
+            + "LEFT JOIN director d ON fd.director_id = d.director_id ");
+
+        if (by.equals("title")) {
+            sql.append("WHERE LOWER(f.name) LIKE LOWER('%").append(query).append("%') ");
+        }
+        if (by.equals("director")) {
+            sql.append("WHERE LOWER(d.director_name) LIKE LOWER('%").append(query).append("%') ");
+        }
+        if (by.equals("title,director") || by.equals("director,title")) {
+            sql.append("WHERE LOWER(f.name) LIKE LOWER('%").append(query).append("%') ");
+            sql.append("OR LOWER(d.director_name) LIKE LOWER('%").append(query).append("%') ");
+        }
+        sql.append("GROUP BY f.film_id, ml.film_id " + "ORDER BY COUNT(ml.film_id) DESC");
+
+        return jdbcTemplate.query(sql.toString(), new FilmSearchMapper());
     }
 
     @Override

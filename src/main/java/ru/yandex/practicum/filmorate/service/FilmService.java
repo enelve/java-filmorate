@@ -5,8 +5,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.DuplicateException;
+import ru.yandex.practicum.filmorate.exception.NotContentException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.FilmSearch;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.repository.*;
 
@@ -135,5 +137,13 @@ public class FilmService {
         }
         filmRepository.delete(id);
         log.debug("Фильм {} удален.", id);
+    }
+
+    public List<FilmSearch> searchFilms(String query, String by) {
+        if (!(by.contains("title") || by.contains("director") || by.contains("title,director") || by.contains("director,title") || by.contains("unknown"))) {
+            log.info("Некорректное значение выборки поиска в поле BY = {}", by);
+            throw new NotContentException("Некорректное значение выборки поиска");
+        }
+        return filmRepository.getFilmBySearch(query, by);
     }
 }
