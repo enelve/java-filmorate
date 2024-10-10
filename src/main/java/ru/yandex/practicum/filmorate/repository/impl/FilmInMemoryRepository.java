@@ -5,10 +5,7 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.repository.FilmRepository;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @Component
 public class FilmInMemoryRepository implements FilmRepository {
@@ -70,5 +67,10 @@ public class FilmInMemoryRepository implements FilmRepository {
 
     @Override
     public void deleteGenres(Integer filmId) {
+    }
+
+    @Override
+    public List<Film> getDirectorFilms(int directorId, String sortBy) {
+        return List.of();
     }
 }
