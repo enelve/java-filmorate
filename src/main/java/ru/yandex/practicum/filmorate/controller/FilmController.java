@@ -10,8 +10,8 @@ import ru.yandex.practicum.filmorate.model.FilmSearch;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import java.util.Collection;
-import java.util.Optional;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequiredArgsConstructor
@@ -75,5 +75,14 @@ public class FilmController {
             @RequestParam(value = "query", defaultValue = "unknown") String query,
             @RequestParam(value = "by", defaultValue = "unknown") String by) {
         return filmService.searchFilms(query, by);
+    }
+
+    @GetMapping("/common")
+    public List<FilmDto> getCommonFilms(
+            @RequestParam(value = "userId") Integer userId,
+            @RequestParam(value = "friendId") Integer friendId) {
+        return filmService.getCommonFilms(userId, friendId).stream()
+                .map(FilmMapper::toDto)
+                .toList();
     }
 }

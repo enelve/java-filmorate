@@ -157,4 +157,12 @@ public class FilmService {
         }
         return filmRepository.getFilmBySearch(query, by);
     }
+
+    public List<Film> getCommonFilms(Integer userId, Integer friendId) {
+        return getAll().stream()
+                .filter(film -> likeRepository.isFilmLikedByUser(film.getId(), userId) &&
+                        likeRepository.isFilmLikedByUser(film.getId(), friendId))
+                .sorted(((o1, o2) -> likeRepository.getCount(o2.getId()) - likeRepository.getCount(o1.getId())))
+                .toList();
+    }
 }
