@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.dto.UserDto;
 import ru.yandex.practicum.filmorate.mapper.UserMapper;
+import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 
@@ -63,5 +64,10 @@ public class UserController {
     @DeleteMapping("{id}")
     public void delete(@PathVariable Integer id) {
         userService.delete(id);
+    }
+
+    @GetMapping("/{id}/feed")
+    public List<Event> getFeedList(@PathVariable Integer id) {
+        return userService.getFeedList(id);
     }
 }

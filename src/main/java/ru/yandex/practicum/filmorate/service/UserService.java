@@ -5,6 +5,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotContentException;
+import ru.yandex.practicum.filmorate.model.Event;
+import ru.yandex.practicum.filmorate.repository.FeedRepository;
 import ru.yandex.practicum.filmorate.repository.FriendshipRepository;
 import ru.yandex.practicum.filmorate.repository.UserRepository;
 import ru.yandex.practicum.filmorate.exception.DuplicateException;
@@ -27,12 +29,14 @@ import static ru.yandex.practicum.filmorate.exception.Error.ERROR_0002;
 public class UserService {
     private final UserRepository userRepository;
     private final FriendshipRepository friendshipRepository;
+    private final FeedRepository feedRepository;
 
     @Autowired
     public UserService(@Qualifier("UserDatabaseRepository") UserRepository userRepository,
-                       FriendshipRepository friendshipRepository) {
+                       FriendshipRepository friendshipRepository, FeedRepository feedRepository) {
         this.userRepository = userRepository;
         this.friendshipRepository = friendshipRepository;
+        this.feedRepository = feedRepository;
     }
 
     public Collection<User> getAll() {
@@ -122,5 +126,14 @@ public class UserService {
         }
         userRepository.delete(id);
         log.debug("Пользователь {} удален.", id);
+    }
+
+    public List<Event> getFeedList(Integer id) {
+        log.info("Запрос списка ленты событий для пользователя {}", id);
+        if (!userRepository.exists(id)) {
+            log.error("Пользователь с Id={} не найден!", id);
+            throw new NotFoundException(String.format(ERROR_0001.message(), id));
+        }
+        return feedRepository.getFeed(id);
     }
 }
