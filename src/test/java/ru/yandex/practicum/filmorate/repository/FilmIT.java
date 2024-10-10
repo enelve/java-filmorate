@@ -129,6 +129,6 @@ class FilmIT {
     }
 
     private Film getTestFilm(String name, LocalDate releaseDate, Set<Genre> genres) {
-        return new Film(null, name, "description", releaseDate, 1, new FilmRating(1, "G"), genres);
+        return new Film(null, name, "description", releaseDate, 1, new FilmRating(1, "G"), genres, List.of());
     }
 }
