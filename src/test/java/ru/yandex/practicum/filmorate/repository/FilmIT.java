@@ -17,6 +17,7 @@ import ru.yandex.practicum.filmorate.service.FilmService;
 import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -124,7 +125,7 @@ class FilmIT {
     }
 
     private Film getTestFilm(String name) {
-        return new Film(null, name, "description", LocalDate.now().minusYears(20), 1, new FilmRating(1, "G"), new HashSet<>());
+        return new Film(null, name, "description", LocalDate.now().minusYears(20), 1, new FilmRating(1, "G"), new HashSet<>(), new ArrayList<>());
     }
 
     private Film getTestFilm(String name, LocalDate releaseDate, Set<Genre> genres) {

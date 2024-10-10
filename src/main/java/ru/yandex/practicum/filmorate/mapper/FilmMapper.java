@@ -14,7 +14,8 @@ public class FilmMapper {
                 film.getReleaseDate(),
                 film.getDuration(),
                 film.getFilmRating(),
-                film.getGenres()
+                film.getGenres(),
+                film.getDirectors()
         );
     }
 
@@ -26,7 +27,8 @@ public class FilmMapper {
                 filmDto.releaseDate(),
                 filmDto.duration(),
                 filmDto.filmRating(),
-                filmDto.genres()
+                filmDto.genres(),
+                filmDto.directors()
         );
     }
 }

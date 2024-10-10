@@ -12,13 +12,13 @@ import java.util.Set;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Film {
+public class FilmSearch {
     private Integer id;
     private String name;
     private String description;
     private LocalDate releaseDate;
     private long duration;
-    private FilmRating filmRating;
+    private FilmRating mpa;
     private Set<Genre> genres = new HashSet<>();
     private List<Director> directors;
 }

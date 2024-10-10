@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.repository.impl;
 
+import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -8,7 +9,11 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
+import ru.yandex.practicum.filmorate.mapper.FilmDirectorMapper;
+import ru.yandex.practicum.filmorate.mapper.FilmSearchMapper;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.FilmSearch;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.repository.FilmRepository;
 import ru.yandex.practicum.filmorate.repository.mapper.FilmMapper;
@@ -25,6 +30,7 @@ import java.util.*;
 @RequiredArgsConstructor
 public class FilmDatabaseRepository implements FilmRepository {
     private final JdbcTemplate jdbcTemplate;
+    private final DirectorDatabaseRepository directorDatabaseRepository;
 
     @Override
     public Film add(Film film) {
@@ -42,6 +48,8 @@ public class FilmDatabaseRepository implements FilmRepository {
         }, keyHolder);
 
         film.setId(keyHolder.getKey().intValue());
+        List<Director> directors = directorDatabaseRepository.addDirectorInFilm(film.getId(), film.getDirectors());
+        film.setDirectors(directors);
         return film;
     }
 
@@ -93,6 +101,57 @@ public class FilmDatabaseRepository implements FilmRepository {
     @Override
     public void deleteGenres(Integer filmId) {
         jdbcTemplate.update("DELETE FROM film_genre WHERE film_id=?", filmId);
+    }
+
+    @Override
+    public List<Film> getDirectorFilms(int directorId, String sortBy) {
+        String sql;
+        switch (sortBy) {
+            case "year":
+                sql = "SELECT f.*, d.director_id, d.director_name FROM film_director fd " +
+                        "JOIN films f ON fd.film_id = f.film_id " +
+                        "JOIN director d ON d.director_id = fd.director_id " +
+                        "WHERE fd.director_id=? ORDER BY f.release_date";
+                break;
+            case "likes":
+                  sql = "SELECT f.*, d.director_id, d.director_name, COUNT(l.USER_ID) FROM films f " +
+                          "JOIN FILM_DIRECTOR fd ON fd.FILM_ID = f.FILM_ID  " +
+                          "JOIN DIRECTOR d ON d.DIRECTOR_ID = fd.DIRECTOR_ID " +
+                          "JOIN LIKES l ON f.FILM_ID = l.FILM_ID " +
+                          "WHERE fd.director_id=? GROUP BY l.film_id " +
+                          "ORDER BY COUNT (l.user_id) DESC";
+                break;
+            default:
+                log.info("Запрашиваемой сортировки не существует: {}", sortBy);
+                throw new ValidationException("Не корректный параметр сортировки");
+        }
+        return jdbcTemplate.query(sql, new FilmDirectorMapper(), directorId);
+    }
+
+    @Override
+    public List<FilmSearch> getFilmBySearch(String query, String by) {
+        StringBuilder sql = new StringBuilder("SELECT f.*, d.*, g.*, fr.RATING_VALUE "
+            + "FROM films f "
+            + "LEFT JOIN likes ml ON f.film_id = ml.film_id "
+            + "LEFT JOIN film_genre fg ON fg.FILM_ID = f.FILM_ID "
+            + "LEFT JOIN genre g ON g.genre_id = fg.GENRE_ID  "
+            + "LEFT JOIN film_director fd ON f.film_id = fd.film_id "
+            + "LEFT JOIN film_rating fr ON fr.film_rating_id = f.film_id "
+            + "LEFT JOIN director d ON fd.director_id = d.director_id ");
+
+        if (by.equals("title")) {
+            sql.append("WHERE LOWER(f.name) LIKE LOWER('%").append(query).append("%') ");
+        }
+        if (by.equals("director")) {
+            sql.append("WHERE LOWER(d.director_name) LIKE LOWER('%").append(query).append("%') ");
+        }
+        if (by.equals("title,director") || by.equals("director,title")) {
+            sql.append("WHERE LOWER(f.name) LIKE LOWER('%").append(query).append("%') ");
+            sql.append("OR LOWER(d.director_name) LIKE LOWER('%").append(query).append("%') ");
+        }
+        sql.append("GROUP BY f.film_id, ml.film_id " + "ORDER BY COUNT(ml.film_id) DESC");
+
+        return jdbcTemplate.query(sql.toString(), new FilmSearchMapper());
     }
 
     @Override
