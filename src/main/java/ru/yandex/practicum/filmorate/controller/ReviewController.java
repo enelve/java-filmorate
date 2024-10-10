@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,6 +13,10 @@ import ru.yandex.practicum.filmorate.dto.ReviewUpdateRequestDto;
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.service.ReviewService;
 
+import java.util.Collection;
+import java.util.Objects;
+import java.util.Optional;
+
 @RestController
 @RequiredArgsConstructor
 @Slf4j
@@ -19,20 +24,31 @@ import ru.yandex.practicum.filmorate.service.ReviewService;
 @RequestMapping("/reviews")
 public class ReviewController {
 
-        private final ReviewService reviewService;
+    private final ReviewService reviewService;
 
-        @GetMapping("/{id}")
-        public ReviewResponseDto findFilm(@PathVariable("id") @Positive Long reviewId) {
-            return reviewService.findById(reviewId);
+    @GetMapping
+    public Collection<ReviewResponseDto> findByFilmId(
+            @RequestParam("filmId") Optional<Integer> filmId,
+            @RequestParam(value = "count", defaultValue = "10") @NotNull @Positive int count) {
+        if (filmId.isPresent()) {
+            return reviewService.findByFilmId(filmId.get(), count);
+        } else {
+            return reviewService.findAll(count);
         }
+    }
 
-        @PostMapping
-        public ReviewResponseDto create(@Valid @RequestBody ReviewSaveRequestDto reviewDto) {
-            return reviewService.save(reviewDto);
-        }
+    @GetMapping("/{id}")
+    public ReviewResponseDto findById(@PathVariable("id") @Positive Long reviewId) {
+        return reviewService.findById(reviewId);
+    }
 
-        @PutMapping
-        public ReviewResponseDto update(@Valid @RequestBody ReviewUpdateRequestDto reviewDto) {
-            return reviewService.update(reviewDto);
-        }
+    @PostMapping
+    public ReviewResponseDto create(@Valid @RequestBody ReviewSaveRequestDto reviewDto) {
+        return reviewService.save(reviewDto);
+    }
+
+    @PutMapping
+    public ReviewResponseDto update(@Valid @RequestBody ReviewUpdateRequestDto reviewDto) {
+        return reviewService.update(reviewDto);
+    }
 }

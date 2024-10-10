@@ -16,6 +16,7 @@ import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.repository.ReviewRepository;
 
 import java.sql.PreparedStatement;
+import java.util.Collection;
 
 @Slf4j
 @Repository
@@ -23,18 +24,33 @@ import java.sql.PreparedStatement;
 @AllArgsConstructor
 public class ReviewDatabaseRepository implements ReviewRepository {
 
-    private static final String FIND_ALL_QUERY = "SELECT * FROM users";
+    private static final String FIND_ALL_QUERY = "SELECT r.*, IFNULL(rr.useful,0) useful " +
+            "FROM REVIEWS r " +
+            "Left JOIN " +
+            "(@USEFUL_QUERY) AS rr " +
+            "ON r.REVIEW_ID  = rr.REVIEW_ID " +
+            "ORDER BY useful " +
+            "LIMIT ?";
     private static final String FIND_BY_ID_QUERY = "SELECT r.*, IFNULL(rr.useful,0) useful " +
             "FROM " +
             "(SELECT * FROM REVIEWS WHERE REVIEW_ID = ?) AS r " +
             "Left JOIN " +
-            "(SELECT  REVIEW_ID, COUNT(is_liked)-COUNT(is_disliked) useful " +
-            "FROM REVIEWS_REACTIONS GROUP BY REVIEW_ID) AS rr " +
+            "(@USEFUL_QUERY) AS rr " +
             "ON r.REVIEW_ID  = rr.REVIEW_ID";
+    private static final String FIND_BY_FILM_ID_QUERY = "SELECT r.*, IFNULL(rr.useful,0) useful " +
+            "FROM " +
+            "(SELECT * FROM REVIEWS WHERE FILM_ID = ?) AS r " +
+            "Left JOIN " +
+            "(@USEFUL_QUERY) AS rr " +
+            "ON r.REVIEW_ID  = rr.REVIEW_ID " +
+            "ORDER BY useful " +
+            "LIMIT ?";
     private static final String INSERT_QUERY = "INSERT INTO reviews(content, is_positive, user_id,"+
             " film_id) VALUES (?, ?, ?, ?)";
-    private static final String UPDATE_QUERY = "UPDATE reviews SET content = ?, is_positive = ?, user_id = ?, "+
+    private static final String UPDATE_QUERY = "UPDATE reviews SET content = ?, is_positive = ?, user_id = ?, " +
             "film_id = ? WHERE review_id = ?";
+    private static final String USEFUL_QUERY = "SELECT  REVIEW_ID, COUNT(is_liked)-COUNT(is_disliked) useful " +
+            "FROM REVIEWS_REACTIONS GROUP BY REVIEW_ID";
 
     protected final JdbcTemplate jdbc;
     protected final RowMapper<Review> mapper;
@@ -82,11 +98,21 @@ public class ReviewDatabaseRepository implements ReviewRepository {
     @Override
     public Review getById(Long id) {
         try {
-            return jdbc.queryForObject(FIND_BY_ID_QUERY, mapper, id);
+            return jdbc.queryForObject(FIND_BY_ID_QUERY.replace("@USEFUL_QUERY",USEFUL_QUERY), mapper, id);
         } catch (EmptyResultDataAccessException ignored) {
             log.error("getById. Review by id = {} not found", id);
             throw  new NotFoundException(String.format("Ревью с id = %d не найден", id));
         }
+    }
+
+    @Override
+    public Collection<Review> getByFilmId(Integer id, int count) {
+            return jdbc.query(FIND_BY_FILM_ID_QUERY.replace("@USEFUL_QUERY",USEFUL_QUERY), mapper, id, count);
+    }
+
+    @Override
+    public Collection<Review> getTop(int count) {
+        return jdbc.query(FIND_ALL_QUERY.replace("@USEFUL_QUERY",USEFUL_QUERY), mapper, count);
     }
 
     @Override

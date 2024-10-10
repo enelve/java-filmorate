@@ -17,6 +17,10 @@ public interface ReviewRepository {
 
     Review getById(Long id);
 
+    Collection<Review> getByFilmId(Integer id, int count);
+
+    Collection<Review> getTop(int count);
+
     Review addLike(Long id, Integer userId);
 
     Review removeLike(Long id, Integer userId);

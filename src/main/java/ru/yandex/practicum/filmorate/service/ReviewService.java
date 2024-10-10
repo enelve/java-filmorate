@@ -43,6 +43,15 @@ public class ReviewService {
         return ReviewMapper.toResponseDto(reviewRepository.getById(reviewId));
     }
 
+    public Collection<ReviewResponseDto> findByFilmId(Integer filmId, int count) {
+        filmService.getById(filmId);
+        return reviewRepository.getByFilmId(filmId, count).stream().map(ReviewMapper::toResponseDto).toList();
+    }
+
+    public Collection<ReviewResponseDto> findAll(int count) {
+        return reviewRepository.getTop(count).stream().map(ReviewMapper::toResponseDto).toList();
+    }
+
     private void onSaveCheck(Integer userId, Integer filmId) {
         List<String> errors = new ArrayList<>();
         try {
