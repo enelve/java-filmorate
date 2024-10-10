@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.dto.FilmDto;
 import ru.yandex.practicum.filmorate.mapper.FilmMapper;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.FilmSearch;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import java.util.Collection;
@@ -63,5 +64,12 @@ public class FilmController {
     @GetMapping("/director/{directorId}")
     public List<Film> getDirectors(@PathVariable int directorId, @RequestParam String sortBy) {
         return filmService.getDirectors(directorId, sortBy);
+    }
+
+    @GetMapping("/search")
+    public List<FilmSearch> searchFilms(
+            @RequestParam(value = "query", defaultValue = "unknown") String query,
+            @RequestParam(value = "by", defaultValue = "unknown") String by) {
+        return filmService.searchFilms(query, by);
     }
 }

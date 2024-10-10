@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.repository;
 
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.FilmSearch;
 import ru.yandex.practicum.filmorate.model.Genre;
 
 import java.util.Collection;
@@ -29,4 +30,6 @@ public interface FilmRepository {
     void deleteGenres(Integer filmId);
 
     List<Film> getDirectorFilms(int directorId, String sortBy);
+
+    List<FilmSearch> getFilmBySearch(String query, String by);
 }
