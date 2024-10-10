@@ -14,6 +14,8 @@ import ru.yandex.practicum.filmorate.repository.*;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Predicate;
 
 import static ru.yandex.practicum.filmorate.exception.Error.*;
 
@@ -122,8 +124,17 @@ public class FilmService {
         return filmRepository.getById(filmId);
     }
 
-    public List<Film> getMostPopular(Integer count) {
-        return filmRepository.getAll().stream()
+    public List<Film> getMostPopularByGenreAndYear(Integer count, Optional<Integer> genreId, Optional<Integer> year) {
+        final Predicate<Film> filmPredicate = film -> {
+            boolean genreMatched = genreId.isEmpty() || film.getGenres().stream().map(Genre::getId)
+                    .anyMatch(id -> id.equals(genreId.get()));
+            boolean yearMatched = year.isEmpty() || year.get().equals(film.getReleaseDate().getYear());
+
+            return genreMatched && yearMatched;
+        };
+
+        return getAll().stream()
+                .filter(filmPredicate)
                 .sorted(((o1, o2) -> likeRepository.getCount(o2.getId()) - likeRepository.getCount(o1.getId())))
                 .limit(count)
                 .toList();

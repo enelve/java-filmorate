@@ -10,6 +10,7 @@ import ru.yandex.practicum.filmorate.model.FilmSearch;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import java.util.Collection;
+import java.util.Optional;
 import java.util.List;
 
 @RestController
@@ -52,8 +53,11 @@ public class FilmController {
     }
 
     @GetMapping("/popular")
-    public Collection<FilmDto> getMostPopular(@RequestParam(defaultValue = "10") Integer count) {
-        return filmService.getMostPopular(count).stream().map(FilmMapper::toDto).toList();
+    public Collection<FilmDto> getMostPopular(
+            @RequestParam(value = "count", defaultValue = "10") Integer count,
+            @RequestParam(value = "genreId", required = false) Optional<Integer> genreId,
+            @RequestParam(value = "year", required = false) Optional<Integer> year) {
+        return filmService.getMostPopularByGenreAndYear(count, genreId, year).stream().map(FilmMapper::toDto).toList();
     }
 
     @DeleteMapping("{id}")
