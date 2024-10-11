@@ -68,5 +68,6 @@ CREATE TABLE IF NOT EXISTS reviews_reactions (
     is_liked BOOLEAN NOT NULL,
     is_disliked BOOLEAN NOT NULL,
     CONSTRAINT reviews_reactions_pk PRIMARY KEY (review_id,user_id),
-    CONSTRAINT reviews_reactions_pk_fk_1 FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE RESTRICT ON UPDATE RESTRICT
+    CONSTRAINT reviews_reactions_pk_fk_1 FOREIGN KEY (user_id) REFERENCES users(user_id) ON DELETE RESTRICT ON UPDATE RESTRICT,
+    CONSTRAINT reviews_reactions_pk_fk_2 FOREIGN KEY (review_id) REFERENCES reviews(review_id) ON DELETE RESTRICT ON UPDATE RESTRICT
 );

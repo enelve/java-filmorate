@@ -52,6 +52,31 @@ public class ReviewService {
         return reviewRepository.getTop(count).stream().map(ReviewMapper::toResponseDto).toList();
     }
 
+    public void deleteReview(Long reviewId) {
+        findById(reviewId);
+        reviewRepository.delete(reviewId);
+    }
+
+    public ReviewResponseDto like(Long reviewId, Integer userId) {
+        onReactionCheck(reviewId, userId);
+        return ReviewMapper.toResponseDto(reviewRepository.addLike(reviewId, userId));
+    }
+
+    public ReviewResponseDto dislike(Long reviewId, Integer userId) {
+        onReactionCheck(reviewId, userId);
+        return ReviewMapper.toResponseDto(reviewRepository.addDislike(reviewId, userId));
+    }
+
+    public ReviewResponseDto removeLike(Long reviewId, Integer userId) {
+        onReactionCheck(reviewId, userId);
+        return ReviewMapper.toResponseDto(reviewRepository.removeLike(reviewId, userId));
+    }
+
+    public ReviewResponseDto removeDislike(Long reviewId, Integer userId) {
+        onReactionCheck(reviewId, userId);
+        return ReviewMapper.toResponseDto(reviewRepository.removeDislike(reviewId, userId));
+    }
+
     private void onSaveCheck(Integer userId, Integer filmId) {
         List<String> errors = new ArrayList<>();
         try {
@@ -79,4 +104,11 @@ public class ReviewService {
         findById(reviewDto.getReviewId());
         onSaveCheck(reviewDto.getUserId(), reviewDto.getFilmId());
     }
+
+    private void onReactionCheck(Long reviewId, Integer userId) {
+        findById(reviewId);
+        userService.getById(userId);
+    }
+
+
 }

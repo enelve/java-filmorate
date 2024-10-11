@@ -49,8 +49,12 @@ public class ReviewDatabaseRepository implements ReviewRepository {
             " film_id) VALUES (?, ?, ?, ?)";
     private static final String UPDATE_QUERY = "UPDATE reviews SET content = ?, is_positive = ?, user_id = ?, " +
             "film_id = ? WHERE review_id = ?";
-    private static final String USEFUL_QUERY = "SELECT  REVIEW_ID, COUNT(is_liked)-COUNT(is_disliked) useful " +
+    private static final String USEFUL_QUERY = "SELECT  REVIEW_ID, " +
+            "COUNT(CASE WHEN IS_LIKED THEN 1 END)-COUNT(CASE WHEN IS_DISLIKED THEN 1 END) useful " +
             "FROM REVIEWS_REACTIONS GROUP BY REVIEW_ID";
+    private static final String DELETE_REVIEW_QUERY = "DELETE FROM REVIEWS WHERE REVIEW_ID = ?";
+    private static final String LIKE_DISLIKE_QUERY = "MERGE INTO reviews_reactions " +
+        "(REVIEW_ID, USER_ID, IS_LIKED, IS_DISLIKED ) KEY(REVIEW_ID, USER_ID) VALUES (?, ?, ?, ?)";
 
     protected final JdbcTemplate jdbc;
     protected final RowMapper<Review> mapper;
@@ -92,7 +96,7 @@ public class ReviewDatabaseRepository implements ReviewRepository {
 
     @Override
     public void delete(Long id) {
-
+        jdbc.update(DELETE_REVIEW_QUERY, id);
     }
 
     @Override
@@ -116,23 +120,27 @@ public class ReviewDatabaseRepository implements ReviewRepository {
     }
 
     @Override
-    public Review addLike(Long id, Integer userId) {
-        return null;
+    public Review addLike(Long ReviewId, Integer userId) {
+        jdbc.update(LIKE_DISLIKE_QUERY, ReviewId, userId, true, false);
+        return getById(ReviewId);
     }
 
     @Override
-    public Review removeLike(Long id, Integer userId) {
-        return null;
+    public Review removeLike(Long ReviewId, Integer userId) {
+        jdbc.update(LIKE_DISLIKE_QUERY, ReviewId, userId, false, false);
+        return getById(ReviewId);
     }
 
     @Override
-    public Review addDislike(Long id, Integer userId) {
-        return null;
+    public Review addDislike(Long ReviewId, Integer userId) {
+        jdbc.update(LIKE_DISLIKE_QUERY, ReviewId, userId, false, true);
+        return getById(ReviewId);
     }
 
     @Override
-    public Review removeDislike(Long id, Integer userId) {
-        return null;
+    public Review removeDislike(Long ReviewId, Integer userId) {
+        jdbc.update(LIKE_DISLIKE_QUERY, ReviewId, userId, false, false);
+        return getById(ReviewId);
     }
 }
 

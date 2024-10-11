@@ -7,9 +7,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.filmorate.dto.FilmDto;
 import ru.yandex.practicum.filmorate.dto.ReviewResponseDto;
 import ru.yandex.practicum.filmorate.dto.ReviewSaveRequestDto;
 import ru.yandex.practicum.filmorate.dto.ReviewUpdateRequestDto;
+import ru.yandex.practicum.filmorate.mapper.FilmMapper;
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.service.ReviewService;
 
@@ -50,5 +52,34 @@ public class ReviewController {
     @PutMapping
     public ReviewResponseDto update(@Valid @RequestBody ReviewUpdateRequestDto reviewDto) {
         return reviewService.update(reviewDto);
+    }
+
+    @PutMapping("{id}/like/{userId}")
+    public ReviewResponseDto like(@PathVariable("id") @Positive Long reviewId,
+                             @PathVariable("id") @Positive Integer userId) {
+            return reviewService.like(reviewId, userId);
+    }
+
+    @PutMapping("{id}/dislike/{userId}")
+    public ReviewResponseDto dislike(@PathVariable("id") @Positive Long reviewId,
+                             @PathVariable("id") @Positive Integer userId) {
+        return reviewService.dislike(reviewId, userId);
+    }
+
+    @DeleteMapping("{id}")
+    public void deleteReview(@PathVariable("id") @Positive Long reviewId) {
+        reviewService.deleteReview(reviewId);
+    }
+
+    @DeleteMapping("{id}/like/{userId}")
+    public ReviewResponseDto removeLike(@PathVariable("id") @Positive Long reviewId,
+                     @PathVariable("id") @Positive Integer userId) {
+        return reviewService.removeLike(reviewId, userId);
+    }
+
+    @DeleteMapping("{id}/dislike/{userId}")
+    public ReviewResponseDto removeDislike(@PathVariable("id") @Positive Long reviewId,
+                        @PathVariable("id") @Positive Integer userId) {
+        return reviewService.removeDislike(reviewId, userId);
     }
 }
