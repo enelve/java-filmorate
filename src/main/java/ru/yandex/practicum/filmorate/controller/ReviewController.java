@@ -7,16 +7,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.dto.FilmDto;
+
 import ru.yandex.practicum.filmorate.dto.ReviewResponseDto;
 import ru.yandex.practicum.filmorate.dto.ReviewSaveRequestDto;
 import ru.yandex.practicum.filmorate.dto.ReviewUpdateRequestDto;
-import ru.yandex.practicum.filmorate.mapper.FilmMapper;
-import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.service.ReviewService;
 
 import java.util.Collection;
-import java.util.Objects;
 import java.util.Optional;
 
 @RestController

@@ -27,5 +27,41 @@ public class Review {
     @NotNull
     private Integer filmId;
 
+    private final Set<Integer> likes = new HashSet<>();
+    private final Set<Integer> dislikes = new HashSet<>();
     private int useful;
+
+    public Review() {
+    }
+
+    public Review(Review review) {
+        this.setId(review.getId());
+        this.setPositive(review.isPositive());
+        this.setContent(review.getContent());
+        this.setFilmId(review.getFilmId());
+        this.setUserId(review.getUserId());
+        this.setUseful(review.getUseful());
+        this.likes.addAll(review.getLikes());
+        this.dislikes.addAll(review.getDislikes());
+    }
+
+    public void addLike(Integer userId) {
+        likes.add(userId);
+    }
+
+    public void addDislike(Integer userId) {
+        dislikes.add(userId);
+    }
+
+    public void removeLike(Integer userId) {
+        likes.remove(userId);
+    }
+
+    public void removeDislike(Integer userId) {
+        dislikes.remove(userId);
+    }
+
+    public void evaluateUseful() {
+        this.useful = likes.size()-dislikes.size();
+    }
 }
