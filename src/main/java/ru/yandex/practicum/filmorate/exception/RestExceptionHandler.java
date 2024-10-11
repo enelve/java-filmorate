@@ -48,6 +48,15 @@ public class RestExceptionHandler extends ExceptionHandlerExceptionResolver {
                 .body(response);
     }
 
+    @ExceptionHandler({NotFoundErrorException.class})
+    public ResponseEntity<ErrorResponseNew> handleException(NotFoundErrorException e) {
+        log.error(e.getMessage());
+        ErrorResponseNew response = new ErrorResponseNew(NOT_FOUND.value(), e.getMessage(), LocalDateTime.now());
+        return ResponseEntity
+                .status(NOT_FOUND)
+                .body(response);
+    }
+
     @ExceptionHandler(DuplicateException.class)
     public ResponseEntity<ErrorResponse> handleException(DuplicateException e) {
         log.error(e.getMessage());

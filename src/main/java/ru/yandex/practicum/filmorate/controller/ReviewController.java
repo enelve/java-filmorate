@@ -53,13 +53,13 @@ public class ReviewController {
 
     @PutMapping("{id}/like/{userId}")
     public ReviewResponseDto like(@PathVariable("id") @Positive Long reviewId,
-                             @PathVariable("id") @Positive Integer userId) {
-            return reviewService.like(reviewId, userId);
+                                  @PathVariable("userId") @Positive Integer userId) {
+        return reviewService.like(reviewId, userId);
     }
 
     @PutMapping("{id}/dislike/{userId}")
     public ReviewResponseDto dislike(@PathVariable("id") @Positive Long reviewId,
-                             @PathVariable("id") @Positive Integer userId) {
+                                     @PathVariable("userId") @Positive Integer userId) {
         return reviewService.dislike(reviewId, userId);
     }
 
@@ -70,13 +70,13 @@ public class ReviewController {
 
     @DeleteMapping("{id}/like/{userId}")
     public ReviewResponseDto removeLike(@PathVariable("id") @Positive Long reviewId,
-                     @PathVariable("id") @Positive Integer userId) {
+                                        @PathVariable("userId") @Positive Integer userId) {
         return reviewService.removeLike(reviewId, userId);
     }
 
     @DeleteMapping("{id}/dislike/{userId}")
     public ReviewResponseDto removeDislike(@PathVariable("id") @Positive Long reviewId,
-                        @PathVariable("id") @Positive Integer userId) {
+                                           @PathVariable("userId") @Positive Integer userId) {
         return reviewService.removeDislike(reviewId, userId);
     }
 }

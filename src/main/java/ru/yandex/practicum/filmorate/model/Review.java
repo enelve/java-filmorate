@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -53,6 +54,14 @@ public class Review {
         dislikes.add(userId);
     }
 
+    public void addLike(Collection<Integer> likes) {
+        this.likes.addAll(likes);
+    }
+
+    public void addDislike(Collection<Integer> dislikes) {
+        this.dislikes.addAll(dislikes);
+    }
+
     public void removeLike(Integer userId) {
         likes.remove(userId);
     }
@@ -62,6 +71,6 @@ public class Review {
     }
 
     public void evaluateUseful() {
-        this.useful = likes.size()-dislikes.size();
+        this.useful = likes.size() - dislikes.size();
     }
 }

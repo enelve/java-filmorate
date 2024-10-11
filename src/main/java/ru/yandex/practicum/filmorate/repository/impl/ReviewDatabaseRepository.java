@@ -2,13 +2,11 @@ package ru.yandex.practicum.filmorate.repository.impl;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Primary;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Repository;
-import ru.yandex.practicum.filmorate.dto.FilmDto;
 import ru.yandex.practicum.filmorate.dto.ReviewReactionDto;
 import ru.yandex.practicum.filmorate.dto.ReviewSaveRequestDto;
 import ru.yandex.practicum.filmorate.dto.ReviewUpdateRequestDto;
@@ -26,19 +24,19 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 public class ReviewDatabaseRepository implements ReviewRepository {
 
-    private static final String FIND_ALL_QUERY = "SELECT r.*, IFNULL(rr.useful,0) useful " +
-            "FROM REVIEWS r " +
-            "Left JOIN " +
-            "(@USEFUL_QUERY) AS rr " +
-            "ON r.REVIEW_ID  = rr.REVIEW_ID " +
-            "ORDER BY useful " +
-            "LIMIT ?";
-    private static final String FIND_BY_ID_QUERY = "SELECT r.*, IFNULL(rr.useful,0) useful " +
-            "FROM " +
-            "(SELECT * FROM REVIEWS WHERE REVIEW_ID = ?) AS r " +
-            "Left JOIN " +
-            "(@USEFUL_QUERY) AS rr " +
-            "ON r.REVIEW_ID  = rr.REVIEW_ID";
+    private static final String FIND_ALL_QUERY = "SELECT r.*, IFNULL(rr.useful,0) useful "
+            + "FROM REVIEWS r "
+            + "Left JOIN "
+            + "(@USEFUL_QUERY) AS rr "
+            + "ON r.REVIEW_ID  = rr.REVIEW_ID "
+            + "ORDER BY useful "
+            + "LIMIT ?";
+    private static final String FIND_BY_ID_QUERY = "SELECT r.*, IFNULL(rr.useful,0) useful "
+            + "FROM "
+            + "(SELECT * FROM REVIEWS WHERE REVIEW_ID = ?) AS r "
+            + "Left JOIN "
+            + "(@USEFUL_QUERY) AS rr "
+            + "ON r.REVIEW_ID  = rr.REVIEW_ID";
     private static final String FIND_BY_FILM_ID_QUERY = "SELECT r.*, IFNULL(rr.useful,0) useful " +
             "FROM " +
             "(SELECT * FROM REVIEWS WHERE FILM_ID = ?) AS r " +
@@ -47,7 +45,7 @@ public class ReviewDatabaseRepository implements ReviewRepository {
             "ON r.REVIEW_ID  = rr.REVIEW_ID " +
             "ORDER BY useful " +
             "LIMIT ?";
-    private static final String INSERT_QUERY = "INSERT INTO reviews(content, is_positive, user_id,"+
+    private static final String INSERT_QUERY = "INSERT INTO reviews(content, is_positive, user_id," +
             " film_id) VALUES (?, ?, ?, ?)";
     private static final String UPDATE_QUERY = "UPDATE reviews SET content = ?, is_positive = ?, user_id = ?, " +
             "film_id = ? WHERE review_id = ?";
@@ -56,7 +54,7 @@ public class ReviewDatabaseRepository implements ReviewRepository {
             "FROM REVIEWS_REACTIONS GROUP BY REVIEW_ID";
     private static final String DELETE_REVIEW_QUERY = "DELETE FROM REVIEWS WHERE REVIEW_ID = ?";
     private static final String LIKE_DISLIKE_QUERY = "MERGE INTO reviews_reactions " +
-        "(REVIEW_ID, USER_ID, IS_LIKED, IS_DISLIKED ) KEY(REVIEW_ID, USER_ID) VALUES (?, ?, ?, ?)";
+            "(REVIEW_ID, USER_ID, IS_LIKED, IS_DISLIKED ) KEY(REVIEW_ID, USER_ID) VALUES (?, ?, ?, ?)";
     private static final String REACTIONS_BY_REVIEW_ID_QUERY = "SELECT REVIEW_ID, USER_ID, IS_LIKED, IS_DISLIKED " +
             "FROM REVIEWS_REACTIONS rr " +
             "INNER JOIN " +
@@ -108,54 +106,54 @@ public class ReviewDatabaseRepository implements ReviewRepository {
     @Override
     public Review getById(Long id) {
         try {
-            Review review = jdbc.queryForObject(FIND_BY_ID_QUERY.replace("@USEFUL_QUERY",USEFUL_QUERY),
+            Review review = jdbc.queryForObject(FIND_BY_ID_QUERY.replace("@USEFUL_QUERY", USEFUL_QUERY),
                     mapper, id);
             matchReactions(Set.of(review));
-            return  review;
+            return review;
         } catch (EmptyResultDataAccessException ignored) {
             log.error("getById. Review by id = {} not found", id);
-            throw  new NotFoundException(String.format("Ревью с id = %d не найден", id));
+            throw new NotFoundException(String.format("Ревью с id = %d не найден", id));
         }
     }
 
     @Override
     public Collection<Review> getByFilmId(Integer id, int count) {
-        Collection<Review> reviews = jdbc.query(FIND_BY_FILM_ID_QUERY.replace("@USEFUL_QUERY",USEFUL_QUERY),
+        Collection<Review> reviews = jdbc.query(FIND_BY_FILM_ID_QUERY.replace("@USEFUL_QUERY", USEFUL_QUERY),
                 mapper, id, count);
         matchReactions(reviews);
-        return  reviews;
+        return reviews;
     }
 
     @Override
     public Collection<Review> getTop(int count) {
-        Collection<Review> reviews = jdbc.query(FIND_ALL_QUERY.replace("@USEFUL_QUERY",USEFUL_QUERY),
+        Collection<Review> reviews = jdbc.query(FIND_ALL_QUERY.replace("@USEFUL_QUERY", USEFUL_QUERY),
                 mapper, count);
         matchReactions(reviews);
-        return  reviews;
+        return reviews;
     }
 
     @Override
-    public Review addLike(Long ReviewId, Integer userId) {
-        jdbc.update(LIKE_DISLIKE_QUERY, ReviewId, userId, true, false);
-        return getById(ReviewId);
+    public Review addLike(Long reviewId, Integer userId) {
+        jdbc.update(LIKE_DISLIKE_QUERY, reviewId, userId, true, false);
+        return getById(reviewId);
     }
 
     @Override
-    public Review removeLike(Long ReviewId, Integer userId) {
-        jdbc.update(LIKE_DISLIKE_QUERY, ReviewId, userId, false, false);
-        return getById(ReviewId);
+    public Review removeLike(Long reviewId, Integer userId) {
+        jdbc.update(LIKE_DISLIKE_QUERY, reviewId, userId, false, false);
+        return getById(reviewId);
     }
 
     @Override
-    public Review addDislike(Long ReviewId, Integer userId) {
-        jdbc.update(LIKE_DISLIKE_QUERY, ReviewId, userId, false, true);
-        return getById(ReviewId);
+    public Review addDislike(Long reviewId, Integer userId) {
+        jdbc.update(LIKE_DISLIKE_QUERY, reviewId, userId, false, true);
+        return getById(reviewId);
     }
 
     @Override
-    public Review removeDislike(Long ReviewId, Integer userId) {
-        jdbc.update(LIKE_DISLIKE_QUERY, ReviewId, userId, false, false);
-        return getById(ReviewId);
+    public Review removeDislike(Long reviewId, Integer userId) {
+        jdbc.update(LIKE_DISLIKE_QUERY, reviewId, userId, false, false);
+        return getById(reviewId);
     }
 
     public Collection<ReviewReactionDto> getReactions(Set<Long> reviewsIds) {
@@ -170,7 +168,7 @@ public class ReviewDatabaseRepository implements ReviewRepository {
                 appendUnion = false;
             }
         }
-        return jdbc.query(REACTIONS_BY_REVIEW_ID_QUERY.replace("@REVIEWS_IDS",sb.toString()),
+        return jdbc.query(REACTIONS_BY_REVIEW_ID_QUERY.replace("@REVIEWS_IDS", sb.toString()),
                 reviewReactionMapper);
     }
 
@@ -179,17 +177,17 @@ public class ReviewDatabaseRepository implements ReviewRepository {
             return;
         }
         Set<Long> reviewsIds = reviews.stream()
-                        .map(Review::getId)
+                .map(Review::getId)
                 .collect(Collectors.toSet());
         Collection<ReviewReactionDto> reactions = getReactions(reviewsIds);
         reviews.forEach(
                 review -> {
-                    review.getLikes().addAll(reactions.stream()
+                    review.addLike(reactions.stream()
                             .filter(row ->
-                                row.getReviewId().equals(review.getId()) && row.isLiked())
-                                    .map(ReviewReactionDto::getUserId)
+                                    row.getReviewId().equals(review.getId()) && row.isLiked())
+                            .map(ReviewReactionDto::getUserId)
                             .collect(Collectors.toSet()));
-                    review.getDislikes().addAll(reactions.stream()
+                    review.addDislike(reactions.stream()
                             .filter(row ->
                                     row.getReviewId().equals(review.getId()) && row.isDisliked())
                             .map(ReviewReactionDto::getUserId)

@@ -3,15 +3,11 @@ package ru.yandex.practicum.filmorate.repository.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
-import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.dto.ReviewSaveRequestDto;
 import ru.yandex.practicum.filmorate.dto.ReviewUpdateRequestDto;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.mapper.FilmMapper;
 import ru.yandex.practicum.filmorate.mapper.ReviewMapper;
-import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.repository.ReviewRepository;
 
@@ -79,8 +75,8 @@ public class ReviewMemoryRepository implements ReviewRepository {
     @Override
     public Review addLike(Long id, Integer userId) {
         Review review = getById(id);
-        review.getDislikes().remove(userId);
-        review.getLikes().add(userId);
+        review.removeDislike(userId);
+        review.addLike(userId);
         review.evaluateUseful();
         storage.put(id, new Review(review));
         return review;
@@ -89,7 +85,7 @@ public class ReviewMemoryRepository implements ReviewRepository {
     @Override
     public Review removeLike(Long id, Integer userId) {
         Review review = getById(id);
-        review.getLikes().remove(userId);
+        review.removeLike(userId);
         review.evaluateUseful();
         storage.put(id, new Review(review));
         return review;
@@ -98,8 +94,8 @@ public class ReviewMemoryRepository implements ReviewRepository {
     @Override
     public Review addDislike(Long id, Integer userId) {
         Review review = getById(id);
-        review.getDislikes().add(userId);
-        review.getLikes().remove(userId);
+        review.addDislike(userId);
+        review.removeLike(userId);
         review.evaluateUseful();
         storage.put(id, new Review(review));
         return review;
@@ -108,7 +104,7 @@ public class ReviewMemoryRepository implements ReviewRepository {
     @Override
     public Review removeDislike(Long id, Integer userId) {
         Review review = getById(id);
-        review.getDislikes().remove(userId);
+        review.removeDislike(userId);
         review.evaluateUseful();
         storage.put(id, new Review(review));
         return review;

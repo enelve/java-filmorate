@@ -6,9 +6,12 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.dto.FilmDto;
 import ru.yandex.practicum.filmorate.mapper.FilmMapper;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.FilmSearch;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import java.util.Collection;
+import java.util.Optional;
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -50,12 +53,27 @@ public class FilmController {
     }
 
     @GetMapping("/popular")
-    public Collection<FilmDto> getMostPopular(@RequestParam(defaultValue = "10") Integer count) {
-        return filmService.getMostPopular(count).stream().map(FilmMapper::toDto).toList();
+    public Collection<FilmDto> getMostPopular(
+            @RequestParam(value = "count", defaultValue = "10") Integer count,
+            @RequestParam(value = "genreId", required = false) Optional<Integer> genreId,
+            @RequestParam(value = "year", required = false) Optional<Integer> year) {
+        return filmService.getMostPopularByGenreAndYear(count, genreId, year).stream().map(FilmMapper::toDto).toList();
     }
 
     @DeleteMapping("{id}")
-    public void delete(@PathVariable Integer id) {
+    public void deleteFilm(@PathVariable Integer id) {
         filmService.delete(id);
+    }
+
+    @GetMapping("/director/{directorId}")
+    public List<Film> getDirectors(@PathVariable int directorId, @RequestParam String sortBy) {
+        return filmService.getDirectors(directorId, sortBy);
+    }
+
+    @GetMapping("/search")
+    public List<FilmSearch> searchFilms(
+            @RequestParam(value = "query", defaultValue = "unknown") String query,
+            @RequestParam(value = "by", defaultValue = "unknown") String by) {
+        return filmService.searchFilms(query, by);
     }
 }
