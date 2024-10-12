@@ -23,8 +23,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @AutoConfigureTestDatabase
@@ -112,6 +111,34 @@ class FilmIT {
         filmService.deleteLike(film1.getId(), user1.getId());
         filmService.deleteLike(film1.getId(), user2.getId());
         assertEquals(film2.getId(), filmService.getMostPopularByGenreAndYear(1, Optional.empty(), Optional.empty()).get(0).getId());
+    }
+
+
+    @Test
+    void commonFilmsExists() {
+        User user1 = userService.add(getTestUser("email1", "login1"));
+        User user2 = userService.add(getTestUser("email2", "login2"));
+        Film film2 = filmService.add(getTestFilm("film2"));
+        Film film1 = filmService.add(getTestFilm("film1"));
+        filmService.addLike(film1.getId(), user1.getId());
+        filmService.addLike(film1.getId(), user2.getId());
+
+        List<Film> actual = filmService.getCommonFilms(user1.getId(), user2.getId());
+        assertEquals(1, actual.size());
+        assertEquals("film1", actual.get(0).getName());
+    }
+
+    @Test
+    void commonFilmsDoesNotExist() {
+        User user1 = userService.add(getTestUser("email1", "login1"));
+        User user2 = userService.add(getTestUser("email2", "login2"));
+        Film film2 = filmService.add(getTestFilm("film2"));
+        Film film1 = filmService.add(getTestFilm("film1"));
+        filmService.addLike(film1.getId(), user1.getId());
+        filmService.addLike(film2.getId(), user2.getId());
+
+        List<Film> actual = filmService.getCommonFilms(user1.getId(), user2.getId());
+        assertEquals(0, actual.size());
     }
 
     private void cleanUpDatabase() {
