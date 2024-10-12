@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.NotContentException;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.repository.FriendshipRepository;
 import ru.yandex.practicum.filmorate.repository.UserRepository;
 import ru.yandex.practicum.filmorate.exception.DuplicateException;
@@ -112,6 +113,10 @@ public class UserService {
                 .filter(p -> p.getValue() > 1)
                 .map(Map.Entry::getKey)
                 .toList();
+    }
+
+    public Collection<Film> getRecommendations(Integer id) {
+        return userRepository.getRecommendations(id);
     }
 
     public void delete(Integer id) {
