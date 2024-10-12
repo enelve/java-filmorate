@@ -16,7 +16,6 @@ import java.util.*;
 @Repository
 @Slf4j
 @RequiredArgsConstructor
-@Primary
 public class ReviewMemoryRepository implements ReviewRepository {
 
     private final Map<Long, Review> storage = new HashMap<>();

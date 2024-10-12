@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.repository.impl;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Primary;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -21,6 +22,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Repository
+@Primary
 @AllArgsConstructor
 public class ReviewDatabaseRepository implements ReviewRepository {
 
@@ -29,7 +31,7 @@ public class ReviewDatabaseRepository implements ReviewRepository {
             + "Left JOIN "
             + "(@USEFUL_QUERY) AS rr "
             + "ON r.REVIEW_ID  = rr.REVIEW_ID "
-            + "ORDER BY useful "
+            + "ORDER BY useful desc "
             + "LIMIT ?";
     private static final String FIND_BY_ID_QUERY = "SELECT r.*, IFNULL(rr.useful,0) useful "
             + "FROM "
@@ -43,7 +45,7 @@ public class ReviewDatabaseRepository implements ReviewRepository {
             "Left JOIN " +
             "(@USEFUL_QUERY) AS rr " +
             "ON r.REVIEW_ID  = rr.REVIEW_ID " +
-            "ORDER BY useful " +
+            "ORDER BY useful desc " +
             "LIMIT ?";
     private static final String INSERT_QUERY = "INSERT INTO reviews(content, is_positive, user_id," +
             " film_id) VALUES (?, ?, ?, ?)";
@@ -158,15 +160,16 @@ public class ReviewDatabaseRepository implements ReviewRepository {
 
     public Collection<ReviewReactionDto> getReactions(Set<Long> reviewsIds) {
         StringBuilder sb = new StringBuilder();
-        boolean appendUnion = reviewsIds.size() > 1;
+        boolean appendUnion = false;
         for (Long reviewsId : reviewsIds) {
+            if (appendUnion) {
+                sb.append(" Union ");
+            } else {
+                appendUnion = true;
+            }
             sb.append("SELECT ");
             sb.append(reviewsId);
             sb.append(" as id");
-            if (appendUnion) {
-                sb.append(" Union ");
-                appendUnion = false;
-            }
         }
         return jdbc.query(REACTIONS_BY_REVIEW_ID_QUERY.replace("@REVIEWS_IDS", sb.toString()),
                 reviewReactionMapper);
