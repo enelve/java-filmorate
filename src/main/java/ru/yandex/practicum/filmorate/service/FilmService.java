@@ -31,6 +31,7 @@ public class FilmService {
     private final DirectorRepository directorRepository;
     private final FeedRepository feedRepository;
     private static final EventTypesEnum EVENT_TYPES = EventTypesEnum.LIKE;
+
     @Autowired
     public FilmService(@Qualifier("FilmDatabaseRepository") FilmRepository filmRepository, FilmRatingRepository filmRatingRepository,
                        LikeRepository likeRepository, GenreRepository genreRepository, DirectorRepository directorRepository, FeedRepository feedRepository) {
