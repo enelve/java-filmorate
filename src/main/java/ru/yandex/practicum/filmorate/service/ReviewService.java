@@ -34,7 +34,6 @@ public class ReviewService {
         onSaveCheck(reviewDto.getUserId(), reviewDto.getFilmId());
         Review review = reviewRepository.add(reviewDto);
         feedRepository.add(reviewDto.getUserId(), review.getId(), EVENT_TYPES, OperationsEnum.ADD);
-//        return ReviewMapper.toResponseDto(reviewRepository.add(reviewDto));
         return ReviewMapper.toResponseDto(review);
     }
 
@@ -43,7 +42,6 @@ public class ReviewService {
         onUpdateCheck(reviewDto);
         Review review = reviewRepository.update(reviewDto);
         feedRepository.add(reviewDto.getUserId(), review.getId(), EVENT_TYPES, OperationsEnum.UPDATE);
-//        return ReviewMapper.toResponseDto(reviewRepository.update(reviewDto));
         return ReviewMapper.toResponseDto(review);
     }
 
