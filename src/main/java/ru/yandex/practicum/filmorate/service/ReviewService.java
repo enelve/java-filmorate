@@ -6,8 +6,12 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.dto.ReviewResponseDto;
 import ru.yandex.practicum.filmorate.dto.ReviewSaveRequestDto;
 import ru.yandex.practicum.filmorate.dto.ReviewUpdateRequestDto;
+import ru.yandex.practicum.filmorate.enums.EventTypesEnum;
+import ru.yandex.practicum.filmorate.enums.OperationsEnum;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.mapper.ReviewMapper;
+import ru.yandex.practicum.filmorate.model.Review;
+import ru.yandex.practicum.filmorate.repository.FeedRepository;
 import ru.yandex.practicum.filmorate.repository.ReviewRepository;
 
 import java.util.ArrayList;
@@ -22,17 +26,23 @@ public class ReviewService {
     private final ReviewRepository reviewRepository;
     private final UserService userService;
     private final FilmService filmService;
+    private final FeedRepository feedRepository;
+    private static final EventTypesEnum EVENT_TYPES = EventTypesEnum.REVIEW;
 
     public ReviewResponseDto save(ReviewSaveRequestDto reviewDto) {
         log.debug("starting saving {}", reviewDto);
         onSaveCheck(reviewDto.getUserId(), reviewDto.getFilmId());
-        return ReviewMapper.toResponseDto(reviewRepository.add(reviewDto));
+        Review review = reviewRepository.add(reviewDto);
+        feedRepository.add(reviewDto.getUserId(), review.getId(), EVENT_TYPES, OperationsEnum.ADD);
+        return ReviewMapper.toResponseDto(review);
     }
 
     public ReviewResponseDto update(ReviewUpdateRequestDto reviewDto) {
         log.debug("starting updating {}", reviewDto);
         onUpdateCheck(reviewDto);
-        return ReviewMapper.toResponseDto(reviewRepository.update(reviewDto));
+        Review review = reviewRepository.update(reviewDto);
+        feedRepository.add(reviewDto.getUserId(), review.getId(), EVENT_TYPES, OperationsEnum.UPDATE);
+        return ReviewMapper.toResponseDto(review);
     }
 
     public ReviewResponseDto findById(Long reviewId) {
@@ -49,7 +59,8 @@ public class ReviewService {
     }
 
     public void deleteReview(Long reviewId) {
-        findById(reviewId);
+        ReviewResponseDto review = findById(reviewId);
+        feedRepository.add(review.getUserId(), reviewId, EVENT_TYPES, OperationsEnum.REMOVE);
         reviewRepository.delete(reviewId);
     }
 

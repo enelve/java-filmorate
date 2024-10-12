@@ -4,6 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.enums.EventTypesEnum;
+import ru.yandex.practicum.filmorate.enums.OperationsEnum;
 import ru.yandex.practicum.filmorate.exception.DuplicateException;
 import ru.yandex.practicum.filmorate.exception.NotContentException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
@@ -27,15 +29,18 @@ public class FilmService {
     private final LikeRepository likeRepository;
     private final GenreRepository genreRepository;
     private final DirectorRepository directorRepository;
+    private final FeedRepository feedRepository;
+    private static final EventTypesEnum EVENT_TYPES = EventTypesEnum.LIKE;
 
     @Autowired
     public FilmService(@Qualifier("FilmDatabaseRepository") FilmRepository filmRepository, FilmRatingRepository filmRatingRepository,
-                       LikeRepository likeRepository, GenreRepository genreRepository, DirectorRepository directorRepository) {
+                       LikeRepository likeRepository, GenreRepository genreRepository, DirectorRepository directorRepository, FeedRepository feedRepository) {
         this.filmRepository = filmRepository;
         this.filmRatingRepository = filmRatingRepository;
         this.likeRepository = likeRepository;
         this.genreRepository = genreRepository;
         this.directorRepository = directorRepository;
+        this.feedRepository = feedRepository;
     }
 
     public Film add(Film film) {
@@ -105,6 +110,7 @@ public class FilmService {
     public Film addLike(Integer filmId, Integer userId) {
         log.info("Пользоателю {} понравился фильм {}.", userId, filmId);
         likeRepository.add(filmId, userId);
+        feedRepository.add(userId,filmId, EVENT_TYPES, OperationsEnum.ADD);
         return filmRepository.getById(filmId);
     }
 
@@ -121,6 +127,7 @@ public class FilmService {
             throw new NotFoundException(String.format(ERROR_0003.message(), filmId, userId));
         }
         likeRepository.remove(filmId, userId);
+        feedRepository.add(userId,filmId, EVENT_TYPES, OperationsEnum.REMOVE);
         return filmRepository.getById(filmId);
     }
 
