@@ -1,6 +1,7 @@
 package ru.yandex.practicum.filmorate.repository.impl;
 
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.repository.UserRepository;
 
@@ -57,5 +58,10 @@ public class UserInMemoryRepository implements UserRepository {
     @Override
     public boolean exists(Integer id) {
         return false;
+    }
+
+    @Override
+    public Collection<Film> getRecommendations(Integer userId) {
+        return null;
     }
 }

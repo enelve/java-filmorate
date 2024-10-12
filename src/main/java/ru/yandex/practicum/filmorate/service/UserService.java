@@ -4,8 +4,11 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.enums.EventTypesEnum;
+import ru.yandex.practicum.filmorate.enums.OperationsEnum;
 import ru.yandex.practicum.filmorate.exception.NotContentException;
 import ru.yandex.practicum.filmorate.model.Event;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.repository.FeedRepository;
 import ru.yandex.practicum.filmorate.repository.FriendshipRepository;
 import ru.yandex.practicum.filmorate.repository.UserRepository;
@@ -30,6 +33,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final FriendshipRepository friendshipRepository;
     private final FeedRepository feedRepository;
+    private static final EventTypesEnum EVENT_TYPES = EventTypesEnum.FRIEND;
 
     @Autowired
     public UserService(@Qualifier("UserDatabaseRepository") UserRepository userRepository,
@@ -83,7 +87,10 @@ public class UserService {
         if (!idList.contains(friendId)) {
             throw new NotFoundException(String.format(ERROR_0001.message(), friendId));
         }
-        if (!friendshipRepository.exist(id, friendId)) friendshipRepository.addFriend(id, friendId, true);
+        if (!friendshipRepository.exist(id, friendId)) {
+            friendshipRepository.addFriend(id, friendId, true);
+            feedRepository.add(id, friendId, EVENT_TYPES, OperationsEnum.ADD);
+        }
         return userRepository.getById(id);
     }
 
@@ -96,6 +103,7 @@ public class UserService {
         }
 
         friendshipRepository.deleteFriend(id, friendId);
+        feedRepository.add(id, friendId, EVENT_TYPES, OperationsEnum.REMOVE);
         return userRepository.getById(id);
     }
 
@@ -116,6 +124,10 @@ public class UserService {
                 .filter(p -> p.getValue() > 1)
                 .map(Map.Entry::getKey)
                 .toList();
+    }
+
+    public Collection<Film> getRecommendations(Integer id) {
+        return userRepository.getRecommendations(id);
     }
 
     public void delete(Integer id) {

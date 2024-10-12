@@ -6,7 +6,9 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
+import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.repository.UserRepository;
+import ru.yandex.practicum.filmorate.repository.mapper.FilmMapper;
 import ru.yandex.practicum.filmorate.repository.mapper.UserMapper;
 import ru.yandex.practicum.filmorate.model.User;
 
@@ -89,5 +91,20 @@ public class UserDatabaseRepository implements UserRepository {
             log.trace("there is no data for user with id = {}", id);
             return false;
         }
+    }
+
+    @Override
+    public Collection<Film> getRecommendations(Integer userId) {
+        String sql = "SELECT f.film_id, f.name, f.description, f.release_date, f.duration, f.film_rating_id\n" +
+                "FROM likes l JOIN FILMS f \n" +
+                "ON l.FILM_ID = f.FILM_ID \n" +
+                "WHERE l.user_id IN (SELECT l2.user_id\n" +
+                "FROM likes l1\n" +
+                "JOIN likes l2 ON l1.film_id = l2.film_id AND l1.user_id <> l2.user_id\n" +
+                "WHERE l1.user_id = ?\n" +
+                "GROUP BY l2.user_id\n" +
+                "ORDER BY COUNT(*) DESC LIMIT 1)\n" +
+                "AND l.film_id NOT IN (SELECT film_id FROM likes WHERE user_id = ?)";
+        return jdbcTemplate.query(sql, new FilmMapper(), userId, userId);
     }
 }

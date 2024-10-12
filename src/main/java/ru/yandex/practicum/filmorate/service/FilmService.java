@@ -4,6 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.enums.EventTypesEnum;
+import ru.yandex.practicum.filmorate.enums.OperationsEnum;
 import ru.yandex.practicum.filmorate.exception.DuplicateException;
 import ru.yandex.practicum.filmorate.exception.NotContentException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
@@ -14,6 +16,8 @@ import ru.yandex.practicum.filmorate.repository.*;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Predicate;
 
 import static ru.yandex.practicum.filmorate.exception.Error.*;
 
@@ -25,15 +29,17 @@ public class FilmService {
     private final LikeRepository likeRepository;
     private final GenreRepository genreRepository;
     private final DirectorRepository directorRepository;
-
+    private final FeedRepository feedRepository;
+    private static final EventTypesEnum EVENT_TYPES = EventTypesEnum.LIKE;
     @Autowired
     public FilmService(@Qualifier("FilmDatabaseRepository") FilmRepository filmRepository, FilmRatingRepository filmRatingRepository,
-                       LikeRepository likeRepository, GenreRepository genreRepository, DirectorRepository directorRepository) {
+                       LikeRepository likeRepository, GenreRepository genreRepository, DirectorRepository directorRepository, FeedRepository feedRepository) {
         this.filmRepository = filmRepository;
         this.filmRatingRepository = filmRatingRepository;
         this.likeRepository = likeRepository;
         this.genreRepository = genreRepository;
         this.directorRepository = directorRepository;
+        this.feedRepository = feedRepository;
     }
 
     public Film add(Film film) {
@@ -103,6 +109,7 @@ public class FilmService {
     public Film addLike(Integer filmId, Integer userId) {
         log.info("Пользоателю {} понравился фильм {}.", userId, filmId);
         likeRepository.add(filmId, userId);
+        feedRepository.add(userId,filmId, EVENT_TYPES, OperationsEnum.ADD);
         return filmRepository.getById(filmId);
     }
 
@@ -119,11 +126,21 @@ public class FilmService {
             throw new NotFoundException(String.format(ERROR_0003.message(), filmId, userId));
         }
         likeRepository.remove(filmId, userId);
+        feedRepository.add(userId,filmId, EVENT_TYPES, OperationsEnum.REMOVE);
         return filmRepository.getById(filmId);
     }
 
-    public List<Film> getMostPopular(Integer count) {
-        return filmRepository.getAll().stream()
+    public List<Film> getMostPopularByGenreAndYear(Integer count, Optional<Integer> genreId, Optional<Integer> year) {
+        final Predicate<Film> filmPredicate = film -> {
+            boolean genreMatched = genreId.isEmpty() || film.getGenres().stream().map(Genre::getId)
+                    .anyMatch(id -> id.equals(genreId.get()));
+            boolean yearMatched = year.isEmpty() || year.get().equals(film.getReleaseDate().getYear());
+
+            return genreMatched && yearMatched;
+        };
+
+        return getAll().stream()
+                .filter(filmPredicate)
                 .sorted(((o1, o2) -> likeRepository.getCount(o2.getId()) - likeRepository.getCount(o1.getId())))
                 .limit(count)
                 .toList();
@@ -145,5 +162,13 @@ public class FilmService {
             throw new NotContentException("Некорректное значение выборки поиска");
         }
         return filmRepository.getFilmBySearch(query, by);
+    }
+
+    public List<Film> getCommonFilms(Integer userId, Integer friendId) {
+        return getAll().stream()
+                .filter(film -> likeRepository.isFilmLikedByUser(film.getId(), userId) &&
+                        likeRepository.isFilmLikedByUser(film.getId(), friendId))
+                .sorted(((o1, o2) -> likeRepository.getCount(o2.getId()) - likeRepository.getCount(o1.getId())))
+                .toList();
     }
 }
