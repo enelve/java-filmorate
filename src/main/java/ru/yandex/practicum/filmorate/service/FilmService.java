@@ -90,6 +90,7 @@ public class FilmService {
             for (Genre g : filmRepository.getGenres(f.getId())) {
                 f.getGenres().add(g);
             }
+            f.setDirectors(directorRepository.getDirectorListFromFilm(f.getId()));
         }
         return films;
     }
