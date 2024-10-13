@@ -78,7 +78,11 @@ public class FilmService {
         }
         newFilm.setGenres(filmRepository.getGenres(newFilm.getId()));
         newFilm.setFilmRating(filmRatingRepository.getById(newFilm.getFilmRating().getId()));
-        newFilm.setDirectors(directorRepository.addDirectorInFilm(newFilm.getId(), film.getDirectors()));
+        if (film.getDirectors() != null) {
+            newFilm.setDirectors(directorRepository.addDirectorInFilm(newFilm.getId(), film.getDirectors()));
+        } else {
+            directorRepository.deleteFromFilm(newFilm.getId());
+        }
         return newFilm;
     }
 
