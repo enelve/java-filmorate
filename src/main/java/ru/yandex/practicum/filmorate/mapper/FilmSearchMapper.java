@@ -37,9 +37,11 @@ public class FilmSearchMapper implements RowMapper<FilmSearch> {
         }
         film.setDirectors(directors);
         Set<Genre> genres = new HashSet<>();
-        Genre genre = genreMapper.mapRow(rs, rowNum);
-        genres.add(genre);
-        film.setGenres(genres);
+        if (rs.getInt("genre_id") != 0) {
+            Genre genre = genreMapper.mapRow(rs, rowNum);
+            genres.add(genre);
+            film.setGenres(genres);
+        }
         return film;
     }
 }

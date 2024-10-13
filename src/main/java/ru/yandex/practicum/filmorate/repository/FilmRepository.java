@@ -29,7 +29,7 @@ public interface FilmRepository {
 
     void deleteGenres(Integer filmId);
 
-    List<Film> getDirectorFilms(int directorId, String sortBy);
+    List<FilmSearch> getDirectorFilms(int directorId, String sortBy);
 
     List<FilmSearch> getFilmBySearch(String query, String by);
 }

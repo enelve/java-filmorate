@@ -60,7 +60,7 @@ public class FilmDatabaseRepository implements FilmRepository {
                 "UPDATE films SET name=?, description=?, release_date=?, duration=?, film_rating_id=? WHERE film_id=?",
                 film.getName(),
                 film.getDescription(),
-                Date.valueOf(film.getReleaseDate()),
+                film.getReleaseDate(),
                 film.getDuration(),
                 film.getFilmRating().getId(),
                 film.getId()
@@ -105,7 +105,7 @@ public class FilmDatabaseRepository implements FilmRepository {
     }
 
     @Override
-    public List<Film> getDirectorFilms(int directorId, String sortBy) {
+    public List<FilmSearch> getDirectorFilms(int directorId, String sortBy) {
         String sql;
         switch (sortBy) {
             case "year":
@@ -116,24 +116,42 @@ public class FilmDatabaseRepository implements FilmRepository {
 //                        "JOIN genre g ON g.genre_id = fg.GENRE_ID " +
 //                        "JOIN FILM_RATING fr ON fr.FILM_RATING_ID = f.FILM_RATING_ID " +
 //                        "WHERE fd.director_id=? ORDER BY f.release_date";
-                sql = "SELECT f.*, d.director_id, d.director_name FROM film_director fd " +
+//                sql = "SELECT f.*, d.director_id, d.director_name FROM film_director fd " +
+//                        "JOIN films f ON fd.film_id = f.film_id " +
+//                        "JOIN director d ON d.director_id = fd.director_id " +
+//                        "WHERE fd.director_id=? ORDER BY f.release_date";
+                sql = "SELECT f.*, d.director_id, d.director_name, fg.genre_id, g.genre_type, fr.rating_value FROM film_director fd " +
                         "JOIN films f ON fd.film_id = f.film_id " +
                         "JOIN director d ON d.director_id = fd.director_id " +
-                        "WHERE fd.director_id=? ORDER BY f.release_date";
+                        "LEFT JOIN film_genre fg ON f.film_id = fg.film_id " +
+                        "LEFT JOIN genre g ON fg.genre_id = g.genre_id " +
+                        "LEFT JOIN film_rating fr ON f.FILM_RATING_ID  = fr.FILM_RATING_ID " +
+                        "WHERE fd.director_id = ?" +
+                        "ORDER BY f.release_date";
                 break;
             case "likes":
-                  sql = "SELECT f.*, d.director_id, d.director_name, COUNT(l.USER_ID) FROM films f " +
-                          "JOIN FILM_DIRECTOR fd ON fd.FILM_ID = f.FILM_ID  " +
-                          "JOIN DIRECTOR d ON d.DIRECTOR_ID = fd.DIRECTOR_ID " +
-                          "JOIN LIKES l ON f.FILM_ID = l.FILM_ID " +
-                          "WHERE fd.director_id=? GROUP BY l.film_id " +
-                          "ORDER BY COUNT (l.user_id) DESC";
+//                  sql = "SELECT f.*, d.director_id, d.director_name, COUNT(l.USER_ID) FROM films f " +
+//                          "JOIN FILM_DIRECTOR fd ON fd.FILM_ID = f.FILM_ID  " +
+//                          "JOIN DIRECTOR d ON d.DIRECTOR_ID = fd.DIRECTOR_ID " +
+//                          "JOIN LIKES l ON f.FILM_ID = l.FILM_ID " +
+//                          "WHERE fd.director_id=? GROUP BY l.film_id " +
+//                          "ORDER BY COUNT (l.user_id) DESC";
+                sql = "SELECT f.*, d.director_id, d.director_name, COUNT(l.user_id) AS like_count, fg.genre_id, g.genre_type, fr.rating_value FROM films f " +
+                        "JOIN film_director fd ON fd.film_id = f.film_id " +
+                        "JOIN director d ON d.director_id = fd.director_id " +
+                        "JOIN likes l ON f.film_id = l.film_id " +
+                        "LEFT JOIN film_genre fg ON f.film_id = fg.film_id " +
+                        "LEFT JOIN genre g ON fg.genre_id = g.genre_id " +
+                        "LEFT JOIN film_rating fr ON f.film_rating_id = fr.FILM_RATING_ID " +
+                        "WHERE fd.director_id = ? " +
+                        "GROUP BY f.film_id, d.director_id, d.director_name, fg.genre_id, g.genre_type, fr.rating_value " +
+                        "ORDER BY like_count ";
                 break;
             default:
                 log.info("Запрашиваемой сортировки не существует: {}", sortBy);
                 throw new ValidationException("Не корректный параметр сортировки");
         }
-        return jdbcTemplate.query(sql, new FilmMapper(), directorId);
+        return jdbcTemplate.query(sql, new FilmMpaDirectorMapper(), directorId);
     }
 
     @Override
@@ -144,7 +162,7 @@ public class FilmDatabaseRepository implements FilmRepository {
             + "LEFT JOIN film_genre fg ON fg.FILM_ID = f.FILM_ID "
             + "LEFT JOIN genre g ON g.genre_id = fg.GENRE_ID  "
             + "LEFT JOIN film_director fd ON f.film_id = fd.film_id "
-            + "LEFT JOIN film_rating fr ON fr.film_rating_id = f.film_id "
+            + "LEFT JOIN film_rating fr ON fr.film_rating_id = f.film_rating_id "
             + "LEFT JOIN director d ON fd.director_id = d.director_id ");
 
         if (by.equals("title")) {

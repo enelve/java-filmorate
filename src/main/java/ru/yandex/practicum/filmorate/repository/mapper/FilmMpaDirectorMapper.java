@@ -23,8 +23,10 @@ public class FilmMpaDirectorMapper implements RowMapper<FilmSearch>{
         film.setReleaseDate(rs.getDate("release_date").toLocalDate());
         film.setDuration(rs.getLong("duration"));
         Set<Genre> genres = new HashSet<>();
-        Genre genreFilm = genreMapper.mapRow(rs, rowNum);
-        genres.add(genreFilm);
+        if(rs.getInt("genre_id") != 0) {
+            Genre genreFilm = genreMapper.mapRow(rs, rowNum);
+            genres.add(genreFilm);
+        }
         film.setGenres(genres);
         FilmRating filmRating = new FilmRating();
         filmRating.setId(rs.getInt("film_rating_id"));

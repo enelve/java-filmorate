@@ -115,7 +115,7 @@ public class FilmService {
         return filmRepository.getById(filmId);
     }
 
-    public List<Film> getDirectors(Integer directorId, String sortBy) {
+    public List<FilmSearch> getDirectors(Integer directorId, String sortBy) {
         directorRepository.findById(directorId);
         return filmRepository.getDirectorFilms(directorId, sortBy);
     }

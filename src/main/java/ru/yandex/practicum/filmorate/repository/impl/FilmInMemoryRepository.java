@@ -71,7 +71,7 @@ public class FilmInMemoryRepository implements FilmRepository {
     }
 
     @Override
-    public List<Film> getDirectorFilms(int directorId, String sortBy) {
+    public List<FilmSearch> getDirectorFilms(int directorId, String sortBy) {
         return List.of();
     }
 
