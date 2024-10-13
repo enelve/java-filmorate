@@ -49,8 +49,7 @@ public class ReviewDatabaseRepository implements ReviewRepository {
             "LIMIT ?";
     private static final String INSERT_QUERY = "INSERT INTO reviews(content, is_positive, user_id," +
             " film_id) VALUES (?, ?, ?, ?)";
-    private static final String UPDATE_QUERY = "UPDATE reviews SET content = ?, is_positive = ?, user_id = ?, " +
-            "film_id = ? WHERE review_id = ?";
+    private static final String UPDATE_QUERY = "UPDATE reviews SET content = ?, is_positive = ? WHERE review_id = ?";
     private static final String USEFUL_QUERY = "SELECT  REVIEW_ID, " +
             "COUNT(CASE WHEN IS_LIKED THEN 1 END)-COUNT(CASE WHEN IS_DISLIKED THEN 1 END) useful " +
             "FROM REVIEWS_REACTIONS GROUP BY REVIEW_ID";
@@ -93,8 +92,6 @@ public class ReviewDatabaseRepository implements ReviewRepository {
                 UPDATE_QUERY,
                 reviewDto.getContent(),
                 reviewDto.getIsPositive(),
-                reviewDto.getUserId(),
-                reviewDto.getFilmId(),
                 reviewDto.getReviewId()
         );
         return getById(reviewDto.getReviewId());
