@@ -57,7 +57,7 @@ public class ReviewMemoryRepository implements ReviewRepository {
     public Collection<Review> getByFilmId(Integer id, int count) {
         return storage.values().stream()
                 .filter(review -> review.getFilmId().equals(id))
-                .sorted(Comparator.comparingInt(Review::getUseful))
+                .sorted(Comparator.comparingInt(review -> review.getUseful() * (-1)))
                 .limit(count)
                 .toList();
     }
@@ -65,7 +65,7 @@ public class ReviewMemoryRepository implements ReviewRepository {
     @Override
     public Collection<Review> getTop(int count) {
         return storage.values().stream()
-                .sorted(Comparator.comparingInt(Review::getUseful))
+                .sorted(Comparator.comparingInt(review -> review.getUseful() * (-1)))
                 .limit(count)
                 .toList();
     }
