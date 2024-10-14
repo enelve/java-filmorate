@@ -9,6 +9,7 @@ import ru.yandex.practicum.filmorate.enums.OperationsEnum;
 import ru.yandex.practicum.filmorate.exception.DuplicateException;
 import ru.yandex.practicum.filmorate.exception.NotContentException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.FilmSearch;
 import ru.yandex.practicum.filmorate.model.Genre;
@@ -79,11 +80,11 @@ public class FilmService {
         }
         newFilm.setGenres(filmRepository.getGenres(newFilm.getId()));
         newFilm.setFilmRating(filmRatingRepository.getById(newFilm.getFilmRating().getId()));
-        if (film.getDirectors() != null) {
-            newFilm.setDirectors(directorRepository.addDirectorInFilm(newFilm.getId(), film.getDirectors()));
-        } else {
-            directorRepository.deleteFromFilm(newFilm.getId());
-        }
+//        if (film.getDirectors() != null) {
+//            directorRepository.deleteFromFilm(newFilm.getId());
+//        }
+        directorRepository.deleteFromFilm(newFilm.getId());
+        newFilm.setDirectors(directorRepository.addDirectorInFilm(newFilm.getId(), film.getDirectors()));
         return newFilm;
     }
 
@@ -109,11 +110,13 @@ public class FilmService {
         for (Genre g : filmRepository.getGenres(film.getId())) {
             film.getGenres().add(g);
         }
-        if (film.getDirectors() != null) {
-            film.setDirectors(directorRepository.getDirectorListFromFilm(film.getId()));
+        List<Director> directors = directorRepository.getDirectorListFromFilm(film.getId());
+        if (directors != null && !directors.isEmpty()) {
+            film.setDirectors(directors);
         } else {
             film.setDirectors(new ArrayList<>());
         }
+
         return film;
     }
 
@@ -125,6 +128,9 @@ public class FilmService {
     }
 
     public List<FilmSearch> getDirectors(Integer directorId, String sortBy) {
+        if (!directorRepository.exists(directorId)) {
+            throw new NotFoundException(String.format(ERROR_0001.message(), directorId));
+        }
         directorRepository.findById(directorId);
         return filmRepository.getDirectorFilms(directorId, sortBy);
     }
@@ -152,7 +158,7 @@ public class FilmService {
 
         return getAll().stream()
                 .filter(filmPredicate)
-                .sorted(((o1, o2) -> likeRepository.getCount(o2.getId()) - likeRepository.getCount(o1.getId())))
+                .sorted(((o1, o2) -> likeRepository.getCount(o1.getId()) - likeRepository.getCount(o2.getId())))
                 .limit(count)
                 .toList();
     }

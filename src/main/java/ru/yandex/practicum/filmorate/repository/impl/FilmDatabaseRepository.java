@@ -9,6 +9,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.repository.mapper.FilmDirectorMapper;
 import ru.yandex.practicum.filmorate.mapper.FilmSearchMapper;
 import ru.yandex.practicum.filmorate.model.Director;
@@ -24,6 +25,8 @@ import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.util.*;
+
+import static ru.yandex.practicum.filmorate.exception.Error.ERROR_0001;
 
 @Repository
 @Slf4j
@@ -109,17 +112,6 @@ public class FilmDatabaseRepository implements FilmRepository {
         String sql;
         switch (sortBy) {
             case "year":
-//                sql = "SELECT f.*, fr.RATING_VALUE, d.director_id, d.director_name, g.GENRE_ID, g.GENRE_TYPE FROM film_director fd " +
-//                        "JOIN films f ON fd.film_id = f.film_id " +
-//                        "JOIN director d ON d.director_id = fd.director_id " +
-//                        "JOIN FILM_GENRE fg ON fg.FILM_ID = f.FILM_ID " +
-//                        "JOIN genre g ON g.genre_id = fg.GENRE_ID " +
-//                        "JOIN FILM_RATING fr ON fr.FILM_RATING_ID = f.FILM_RATING_ID " +
-//                        "WHERE fd.director_id=? ORDER BY f.release_date";
-//                sql = "SELECT f.*, d.director_id, d.director_name FROM film_director fd " +
-//                        "JOIN films f ON fd.film_id = f.film_id " +
-//                        "JOIN director d ON d.director_id = fd.director_id " +
-//                        "WHERE fd.director_id=? ORDER BY f.release_date";
                 sql = "SELECT f.*, d.director_id, d.director_name, fg.genre_id, g.genre_type, fr.rating_value FROM film_director fd " +
                         "JOIN films f ON fd.film_id = f.film_id " +
                         "JOIN director d ON d.director_id = fd.director_id " +
@@ -130,12 +122,6 @@ public class FilmDatabaseRepository implements FilmRepository {
                         "ORDER BY f.release_date";
                 break;
             case "likes":
-//                  sql = "SELECT f.*, d.director_id, d.director_name, COUNT(l.USER_ID) FROM films f " +
-//                          "JOIN FILM_DIRECTOR fd ON fd.FILM_ID = f.FILM_ID  " +
-//                          "JOIN DIRECTOR d ON d.DIRECTOR_ID = fd.DIRECTOR_ID " +
-//                          "JOIN LIKES l ON f.FILM_ID = l.FILM_ID " +
-//                          "WHERE fd.director_id=? GROUP BY l.film_id " +
-//                          "ORDER BY COUNT (l.user_id) DESC";
                 sql = "SELECT f.*, d.director_id, d.director_name, COUNT(l.user_id) AS like_count, fg.genre_id, g.genre_type, fr.rating_value FROM films f " +
                         "JOIN film_director fd ON fd.film_id = f.film_id " +
                         "JOIN director d ON d.director_id = fd.director_id " +

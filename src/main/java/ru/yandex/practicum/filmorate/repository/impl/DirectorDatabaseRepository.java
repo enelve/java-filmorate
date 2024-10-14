@@ -84,18 +84,22 @@ public class DirectorDatabaseRepository implements DirectorRepository {
             return new ArrayList<>();
         }
 
-        jdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter() {
-            @Override
-            public void setValues(PreparedStatement ps, int i) throws SQLException {
-                ps.setInt(1, filmId);
-                ps.setInt(2, directorList.get(i).getId());
-            }
+        for (Director director : directorList) {
+            jdbcTemplate.update(sql, filmId, director.getId());
+        }
 
-            @Override
-            public int getBatchSize() {
-                return directorList.size();
-            }
-        });
+//        jdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter() {
+//            @Override
+//            public void setValues(PreparedStatement ps, int i) throws SQLException {
+//                ps.setInt(1, filmId);
+//                ps.setInt(2, directorList.get(i).getId());
+//            }
+//
+//            @Override
+//            public int getBatchSize() {
+//                return directorList.size();
+//            }
+//        });
         return getDirectorListFromFilm(filmId);
     }
 
