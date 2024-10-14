@@ -9,8 +9,6 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
-import ru.yandex.practicum.filmorate.exception.NotFoundException;
-import ru.yandex.practicum.filmorate.repository.mapper.FilmDirectorMapper;
 import ru.yandex.practicum.filmorate.mapper.FilmSearchMapper;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
@@ -18,15 +16,12 @@ import ru.yandex.practicum.filmorate.model.FilmSearch;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.repository.FilmRepository;
 import ru.yandex.practicum.filmorate.repository.mapper.FilmMapper;
-import ru.yandex.practicum.filmorate.repository.mapper.FilmMpaDirectorMapper;
 import ru.yandex.practicum.filmorate.repository.mapper.GenreMapper;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.util.*;
-
-import static ru.yandex.practicum.filmorate.exception.Error.ERROR_0001;
 
 @Repository
 @Slf4j
@@ -108,7 +103,7 @@ public class FilmDatabaseRepository implements FilmRepository {
     }
 
     @Override
-    public List<FilmSearch> getDirectorFilms(int directorId, String sortBy) {
+    public List<Film> getDirectorFilms(int directorId, String sortBy) {
         String sql;
         switch (sortBy) {
             case "year":
@@ -122,22 +117,22 @@ public class FilmDatabaseRepository implements FilmRepository {
                         "ORDER BY f.release_date";
                 break;
             case "likes":
-                sql = "SELECT f.*, d.director_id, d.director_name, COUNT(l.user_id) AS like_count, fg.genre_id, g.genre_type, fr.rating_value FROM films f " +
-                        "JOIN film_director fd ON fd.film_id = f.film_id " +
-                        "JOIN director d ON d.director_id = fd.director_id " +
-                        "JOIN likes l ON f.film_id = l.film_id " +
-                        "LEFT JOIN film_genre fg ON f.film_id = fg.film_id " +
-                        "LEFT JOIN genre g ON fg.genre_id = g.genre_id " +
-                        "LEFT JOIN film_rating fr ON f.film_rating_id = fr.FILM_RATING_ID " +
-                        "WHERE fd.director_id = ? " +
-                        "GROUP BY f.film_id, d.director_id, d.director_name, fg.genre_id, g.genre_type, fr.rating_value " +
-                        "ORDER BY like_count ";
+                sql = "SELECT f.* FROM FILMS f \n" +
+                        "  INNER JOIN \n" +
+                        "  (SELECT  d.FILM_ID, COUNT(l.user_id) likes_count FROM FILM_DIRECTOR d\n" +
+                        "  Left JOIN LIKES l\n" +
+                        "  ON l.FILM_ID = d.FILM_ID\n" +
+                        "  WHERE d.DIRECTOR_ID = ?\n" +
+                        "  GROUP BY d.FILM_ID\n" +
+                        "  ) fl\n" +
+                        "  ON f.FILM_ID = fl.FILM_ID\n" +
+                        "  ORDER BY fl.likes_count desc";
                 break;
             default:
                 log.info("Запрашиваемой сортировки не существует: {}", sortBy);
                 throw new ValidationException("Не корректный параметр сортировки");
         }
-        return jdbcTemplate.query(sql, new FilmMpaDirectorMapper(), directorId);
+        return jdbcTemplate.query(sql, new FilmMapper(), directorId);
     }
 
     @Override

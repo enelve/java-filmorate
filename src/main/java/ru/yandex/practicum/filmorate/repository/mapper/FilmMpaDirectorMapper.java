@@ -10,9 +10,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-public class FilmMpaDirectorMapper implements RowMapper<FilmSearch>{
+public class FilmMpaDirectorMapper implements RowMapper<FilmSearch> {
     private final DirectorMapper directorMapper = new DirectorMapper();
     private final GenreMapper genreMapper = new GenreMapper();
+
     @Override
     public FilmSearch mapRow(ResultSet rs, int rowNum) throws SQLException {
 
@@ -23,7 +24,7 @@ public class FilmMpaDirectorMapper implements RowMapper<FilmSearch>{
         film.setReleaseDate(rs.getDate("release_date").toLocalDate());
         film.setDuration(rs.getLong("duration"));
         Set<Genre> genres = new HashSet<>();
-        if(rs.getInt("genre_id") != 0) {
+        if (rs.getInt("genre_id") != 0) {
             Genre genreFilm = genreMapper.mapRow(rs, rowNum);
             genres.add(genreFilm);
         }

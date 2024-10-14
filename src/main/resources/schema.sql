@@ -59,7 +59,8 @@ CREATE TABLE IF NOT EXISTS friends (
 
 CREATE TABLE IF NOT EXISTS likes (
     film_id BIGINT NOT NULL REFERENCES films (film_id) ON DELETE CASCADE,
-    user_id BIGINT NOT NULL REFERENCES users (user_id) ON DELETE CASCADE
+    user_id BIGINT NOT NULL REFERENCES users (user_id) ON DELETE CASCADE,
+    CONSTRAINT  likes_pk PRIMARY KEY (film_id,user_id)
 );
 
 CREATE TABLE IF NOT EXISTS reviews (

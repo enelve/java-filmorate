@@ -127,12 +127,25 @@ public class FilmService {
         return filmRepository.getById(filmId);
     }
 
-    public List<FilmSearch> getDirectors(Integer directorId, String sortBy) {
+    public List<Film> getDirectors(Integer directorId, String sortBy) {
         if (!directorRepository.exists(directorId)) {
             throw new NotFoundException(String.format(ERROR_0001.message(), directorId));
         }
         directorRepository.findById(directorId);
-        return filmRepository.getDirectorFilms(directorId, sortBy);
+        List<Film> films =  filmRepository.getDirectorFilms(directorId, sortBy);
+        films.forEach(film -> {
+            film.setFilmRating(filmRatingRepository.getById(film.getFilmRating().getId()));
+            for (Genre g : filmRepository.getGenres(film.getId())) {
+                film.getGenres().add(g);
+            }
+            List<Director> directors = directorRepository.getDirectorListFromFilm(film.getId());
+            if (directors != null && !directors.isEmpty()) {
+                film.setDirectors(directors);
+            } else {
+                film.setDirectors(new ArrayList<>());
+            }
+        });
+        return films;
     }
 
     public Film deleteLike(Integer filmId, Integer userId) {
@@ -158,7 +171,7 @@ public class FilmService {
 
         return getAll().stream()
                 .filter(filmPredicate)
-                .sorted(((o1, o2) -> likeRepository.getCount(o1.getId()) - likeRepository.getCount(o2.getId())))
+                .sorted(((o1, o2) -> -(likeRepository.getCount(o1.getId()) - likeRepository.getCount(o2.getId()))))
                 .limit(count)
                 .toList();
     }
