@@ -14,6 +14,7 @@ import ru.yandex.practicum.filmorate.model.FilmSearch;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.repository.*;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -108,7 +109,11 @@ public class FilmService {
         for (Genre g : filmRepository.getGenres(film.getId())) {
             film.getGenres().add(g);
         }
-        film.setDirectors(directorRepository.getDirectorListFromFilm(film.getId()));
+        if (film.getDirectors() != null) {
+            film.setDirectors(directorRepository.getDirectorListFromFilm(film.getId()));
+        } else {
+            film.setDirectors(new ArrayList<>());
+        }
         return film;
     }
 

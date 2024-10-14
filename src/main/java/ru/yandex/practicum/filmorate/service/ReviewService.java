@@ -33,7 +33,7 @@ public class ReviewService {
         log.debug("starting saving {}", reviewDto);
         onSaveCheck(reviewDto.getUserId(), reviewDto.getFilmId());
         Review review = reviewRepository.add(reviewDto);
-        feedRepository.add(reviewDto.getUserId(), review.getId(), EVENT_TYPES, OperationsEnum.ADD);
+        feedRepository.add(review.getUserId(), review.getId(), EVENT_TYPES, OperationsEnum.ADD);
         return ReviewMapper.toResponseDto(review);
     }
 
@@ -41,7 +41,7 @@ public class ReviewService {
         log.debug("starting updating {}", reviewDto);
         onUpdateCheck(reviewDto);
         Review review = reviewRepository.update(reviewDto);
-        feedRepository.add(reviewDto.getUserId(), review.getId(), EVENT_TYPES, OperationsEnum.UPDATE);
+        feedRepository.add(review.getUserId(), review.getId(), EVENT_TYPES, OperationsEnum.UPDATE);
         return ReviewMapper.toResponseDto(review);
     }
 
@@ -60,12 +60,13 @@ public class ReviewService {
 
     public void deleteReview(Long reviewId) {
         ReviewResponseDto review = findById(reviewId);
-        feedRepository.add(review.getUserId(), reviewId, EVENT_TYPES, OperationsEnum.REMOVE);
+        feedRepository.add(review.getUserId(), review.getReviewId(), EVENT_TYPES, OperationsEnum.REMOVE);
         reviewRepository.delete(reviewId);
     }
 
     public ReviewResponseDto like(Long reviewId, Integer userId) {
         onReactionCheck(reviewId, userId);
+//        feedRepository.add(userId, reviewId, EVENT_TYPES, OperationsEnum.ADD);
         return ReviewMapper.toResponseDto(reviewRepository.addLike(reviewId, userId));
     }
 
@@ -76,6 +77,7 @@ public class ReviewService {
 
     public ReviewResponseDto removeLike(Long reviewId, Integer userId) {
         onReactionCheck(reviewId, userId);
+//        feedRepository.add(userId, reviewId, EVENT_TYPES, OperationsEnum.REMOVE);
         return ReviewMapper.toResponseDto(reviewRepository.removeLike(reviewId, userId));
     }
 
