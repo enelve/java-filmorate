@@ -9,9 +9,8 @@ import ru.yandex.practicum.filmorate.enums.OperationsEnum;
 import ru.yandex.practicum.filmorate.exception.NotContentException;
 import ru.yandex.practicum.filmorate.model.Event;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.repository.FeedRepository;
-import ru.yandex.practicum.filmorate.repository.FriendshipRepository;
-import ru.yandex.practicum.filmorate.repository.UserRepository;
+import ru.yandex.practicum.filmorate.model.Genre;
+import ru.yandex.practicum.filmorate.repository.*;
 import ru.yandex.practicum.filmorate.exception.DuplicateException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
@@ -34,13 +33,19 @@ public class UserService {
     private final FriendshipRepository friendshipRepository;
     private final FeedRepository feedRepository;
     private static final EventTypesEnum EVENT_TYPES = EventTypesEnum.FRIEND;
+    private final FilmRatingRepository filmRatingRepository;
+    private final FilmRepository filmRepository;
 
     @Autowired
     public UserService(@Qualifier("UserDatabaseRepository") UserRepository userRepository,
-                       FriendshipRepository friendshipRepository, FeedRepository feedRepository) {
+                       FriendshipRepository friendshipRepository, FeedRepository feedRepository,
+                       FilmRatingRepository filmRatingRepository,
+                       @Qualifier("FilmDatabaseRepository") FilmRepository filmRepository) {
         this.userRepository = userRepository;
         this.friendshipRepository = friendshipRepository;
         this.feedRepository = feedRepository;
+        this.filmRatingRepository = filmRatingRepository;
+        this.filmRepository = filmRepository;
     }
 
     public Collection<User> getAll() {
@@ -127,7 +132,14 @@ public class UserService {
     }
 
     public Collection<Film> getRecommendations(Integer id) {
-        return userRepository.getRecommendations(id);
+        Collection<Film> films = userRepository.getRecommendations(id);
+        for (Film f : films) {
+            f.setFilmRating(filmRatingRepository.getById(f.getFilmRating().getId()));
+            for (Genre g : filmRepository.getGenres(f.getId())) {
+                f.getGenres().add(g);
+            }
+        }
+        return films;
     }
 
     public void delete(Integer id) {
