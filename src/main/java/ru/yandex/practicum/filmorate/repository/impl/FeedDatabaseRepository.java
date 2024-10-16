@@ -15,7 +15,7 @@ import java.util.List;
 
 @Repository
 @Slf4j
-@Component("FeedDatabaseRepository")
+@Component
 @RequiredArgsConstructor
 public class FeedDatabaseRepository implements FeedRepository {
     private final JdbcTemplate jdbcTemplate;

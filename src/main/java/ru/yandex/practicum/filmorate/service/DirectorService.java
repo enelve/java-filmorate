@@ -21,7 +21,7 @@ public class DirectorService {
     DirectorRepository directorRepository;
 
     @Autowired
-    public DirectorService(@Qualifier("DirectorDatabaseRepository") DirectorRepository directorRepository) {
+    public DirectorService(@Qualifier("directorDatabaseRepository") DirectorRepository directorRepository) {
         this.directorRepository = directorRepository;
     }
 

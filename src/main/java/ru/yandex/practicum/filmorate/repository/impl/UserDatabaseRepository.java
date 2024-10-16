@@ -17,7 +17,7 @@ import java.util.Collection;
 
 @Repository
 @Slf4j
-@Component("UserDatabaseRepository")
+@Component("userDatabaseRepository")
 @RequiredArgsConstructor
 public class UserDatabaseRepository implements UserRepository {
     private final JdbcTemplate jdbcTemplate;

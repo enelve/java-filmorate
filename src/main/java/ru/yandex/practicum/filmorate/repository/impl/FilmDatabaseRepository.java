@@ -25,7 +25,7 @@ import java.util.*;
 
 @Repository
 @Slf4j
-@Component("FilmDatabaseRepository")
+@Component
 @RequiredArgsConstructor
 public class FilmDatabaseRepository implements FilmRepository {
     private final JdbcTemplate jdbcTemplate;

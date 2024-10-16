@@ -1,7 +1,15 @@
 package ru.yandex.practicum.filmorate.exception;
 
+import lombok.*;
+
 import java.time.LocalDateTime;
 
-public record ErrorResponse(int status, String message, LocalDateTime timestamp) {
+@Getter
+@Setter
+@AllArgsConstructor
+public class ErrorResponse {
+    private int status;
+    private String message;
+    private LocalDateTime timestamp;
 }
 

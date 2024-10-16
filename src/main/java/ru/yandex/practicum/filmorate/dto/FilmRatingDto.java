@@ -1,7 +1,15 @@
 package ru.yandex.practicum.filmorate.dto;
 
 import jakarta.validation.constraints.NotNull;
+import lombok.*;
 
-public record FilmRatingDto(@NotNull Integer id, @NotNull String name) {
+@Getter
+@Setter
+@AllArgsConstructor
+public class FilmRatingDto {
+    @NotNull
+    private Integer id;
+    @NotNull
+    private String name;
 }
 

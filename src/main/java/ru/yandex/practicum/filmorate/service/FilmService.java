@@ -35,7 +35,7 @@ public class FilmService {
     private static final EventTypesEnum EVENT_TYPES = EventTypesEnum.LIKE;
 
     @Autowired
-    public FilmService(@Qualifier("FilmDatabaseRepository") FilmRepository filmRepository, FilmRatingRepository filmRatingRepository,
+    public FilmService(@Qualifier("filmDatabaseRepository") FilmRepository filmRepository, FilmRatingRepository filmRatingRepository,
                        LikeRepository likeRepository, GenreRepository genreRepository, DirectorRepository directorRepository, FeedRepository feedRepository) {
         this.filmRepository = filmRepository;
         this.filmRatingRepository = filmRatingRepository;
@@ -80,9 +80,6 @@ public class FilmService {
         }
         newFilm.setGenres(filmRepository.getGenres(newFilm.getId()));
         newFilm.setFilmRating(filmRatingRepository.getById(newFilm.getFilmRating().getId()));
-//        if (film.getDirectors() != null) {
-//            directorRepository.deleteFromFilm(newFilm.getId());
-//        }
         directorRepository.deleteFromFilm(newFilm.getId());
         newFilm.setDirectors(directorRepository.addDirectorInFilm(newFilm.getId(), film.getDirectors()));
         return newFilm;

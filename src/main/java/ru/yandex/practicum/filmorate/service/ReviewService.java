@@ -66,7 +66,6 @@ public class ReviewService {
 
     public ReviewResponseDto like(Long reviewId, Integer userId) {
         onReactionCheck(reviewId, userId);
-//        feedRepository.add(userId, reviewId, EVENT_TYPES, OperationsEnum.ADD);
         return ReviewMapper.toResponseDto(reviewRepository.addLike(reviewId, userId));
     }
 
@@ -77,7 +76,6 @@ public class ReviewService {
 
     public ReviewResponseDto removeLike(Long reviewId, Integer userId) {
         onReactionCheck(reviewId, userId);
-//        feedRepository.add(userId, reviewId, EVENT_TYPES, OperationsEnum.REMOVE);
         return ReviewMapper.toResponseDto(reviewRepository.removeLike(reviewId, userId));
     }
 

@@ -15,8 +15,8 @@ public class DirectorMapper {
 
     public static Director toEntity(DirectorDto directorDto) {
         return new Director(
-                directorDto.id(),
-                directorDto.name()
+                directorDto.getId(),
+                directorDto.getName()
         );
     }
 }

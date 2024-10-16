@@ -1,6 +1,14 @@
 package ru.yandex.practicum.filmorate.dto;
 
 import jakarta.validation.constraints.NotNull;
+import lombok.*;
 
-public record GenreDto(@NotNull Integer id, @NotNull String name) {
+@Getter
+@Setter
+@AllArgsConstructor
+public class GenreDto {
+    @NotNull
+    private Integer id;
+    @NotNull
+    private String name;
 }

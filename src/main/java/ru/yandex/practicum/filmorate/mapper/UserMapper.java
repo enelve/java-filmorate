@@ -18,11 +18,11 @@ public class UserMapper {
 
     public static User toEntity(UserDto userDto) {
         return new User(
-                userDto.id(),
-                userDto.email(),
-                userDto.login(),
-                userDto.name(),
-                userDto.birthday()
+                userDto.getId(),
+                userDto.getEmail(),
+                userDto.getLogin(),
+                userDto.getName(),
+                userDto.getBirthday()
         );
     }
 }

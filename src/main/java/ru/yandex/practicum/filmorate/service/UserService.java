@@ -37,10 +37,10 @@ public class UserService {
     private final FilmRepository filmRepository;
 
     @Autowired
-    public UserService(@Qualifier("UserDatabaseRepository") UserRepository userRepository,
+    public UserService(@Qualifier("userDatabaseRepository") UserRepository userRepository,
                        FriendshipRepository friendshipRepository, FeedRepository feedRepository,
                        FilmRatingRepository filmRatingRepository,
-                       @Qualifier("FilmDatabaseRepository") FilmRepository filmRepository) {
+                       @Qualifier("filmDatabaseRepository") FilmRepository filmRepository) {
         this.userRepository = userRepository;
         this.friendshipRepository = friendshipRepository;
         this.feedRepository = feedRepository;

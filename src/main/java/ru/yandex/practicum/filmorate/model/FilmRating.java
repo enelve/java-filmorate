@@ -9,7 +9,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class FilmRating {
-    @NotNull
     private Integer id;
     @NotNull
     private String name;

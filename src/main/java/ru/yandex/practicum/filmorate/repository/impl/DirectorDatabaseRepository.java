@@ -20,7 +20,7 @@ import java.util.List;
 
 @Repository
 @Slf4j
-@Component("DirectorDatabaseRepository")
+@Component
 @RequiredArgsConstructor
 public class DirectorDatabaseRepository implements DirectorRepository {
     private final JdbcTemplate jdbcTemplate;
@@ -86,18 +86,6 @@ public class DirectorDatabaseRepository implements DirectorRepository {
             jdbcTemplate.update(sql, filmId, director.getId());
         }
 
-//        jdbcTemplate.batchUpdate(sql, new BatchPreparedStatementSetter() {
-//            @Override
-//            public void setValues(PreparedStatement ps, int i) throws SQLException {
-//                ps.setInt(1, filmId);
-//                ps.setInt(2, directorList.get(i).getId());
-//            }
-//
-//            @Override
-//            public int getBatchSize() {
-//                return directorList.size();
-//            }
-//        });
         return getDirectorListFromFilm(filmId);
     }
 

@@ -1,10 +1,13 @@
 package ru.yandex.practicum.filmorate.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import lombok.*;
 
-public record DirectorDto(
-        Integer id,
+@Getter
+@Setter
+@AllArgsConstructor
+public class DirectorDto {
+        private Integer id;
         @NotBlank(message = "Название не может быть пустым.")
-        String name
-) {
+        private String name;
 }

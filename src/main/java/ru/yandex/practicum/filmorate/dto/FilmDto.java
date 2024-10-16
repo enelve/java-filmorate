@@ -5,6 +5,7 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
+import lombok.*;
 import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.FilmRating;
 import ru.yandex.practicum.filmorate.model.Genre;
@@ -14,20 +15,23 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 
-public record FilmDto(
-        Integer id,
+
+@Getter
+@Setter
+@AllArgsConstructor
+public class FilmDto {
+        private Integer id;
         @NotBlank(message = "Название не может быть пустым.")
-        String name,
+        private String name;
         @Size(max = 200, message = "Максимальная длина описания — 200 символов.")
-        String description,
+        private String description;
         @ValidReleaseDate(message = "дата релиза — не раньше 28 декабря 1895 года.")
-        LocalDate releaseDate,
+        private LocalDate releaseDate;
         @Positive(message = "Продолжительность фильма должна быть положительным числом.")
-        long duration,
+        private long duration;
         @NotNull
         @JsonProperty("mpa")
-        FilmRating filmRating,
-        Set<Genre> genres,
-        List<Director> directors
-) {
+        private FilmRating filmRating;
+        private Set<Genre> genres;
+        private List<Director> directors;
 }
