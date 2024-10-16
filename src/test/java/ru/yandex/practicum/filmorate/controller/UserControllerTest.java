@@ -229,15 +229,15 @@ class UserControllerTest {
 
 
         // user 1 likes film 1
-        mockMvc.perform(MockMvcRequestBuilders.put("/films/1/like/1"));
+        mockMvc.perform(MockMvcRequestBuilders.put("/films/2/like/1"));
         // user 2 likes films 1 and 2
-        mockMvc.perform(MockMvcRequestBuilders.put("/films/1/like/2"));
         mockMvc.perform(MockMvcRequestBuilders.put("/films/2/like/2"));
+        mockMvc.perform(MockMvcRequestBuilders.put("/films/3/like/2"));
 
         // so film 2 is recommended for user 1
         mockMvc.perform(MockMvcRequestBuilders.get("/users/1/recommendations"))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$").isArray())
-                .andExpect(MockMvcResultMatchers.jsonPath("$[0].id").value(2));
+                .andExpect(MockMvcResultMatchers.jsonPath("$[0].id").value(3));
     }
 }
