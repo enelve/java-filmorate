@@ -17,7 +17,8 @@ import ru.yandex.practicum.filmorate.model.Review;
 import ru.yandex.practicum.filmorate.repository.ReviewRepository;
 
 import java.sql.PreparedStatement;
-import java.util.*;
+import java.util.Collection;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -155,6 +156,7 @@ public class ReviewDatabaseRepository implements ReviewRepository {
         return getById(reviewId);
     }
 
+    @Override
     public Collection<ReviewReactionDto> getReactions(Set<Long> reviewsIds) {
         StringBuilder sb = new StringBuilder();
         boolean appendUnion = false;

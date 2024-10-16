@@ -1,10 +1,12 @@
 package ru.yandex.practicum.filmorate.repository;
 
+import ru.yandex.practicum.filmorate.dto.ReviewReactionDto;
 import ru.yandex.practicum.filmorate.dto.ReviewSaveRequestDto;
 import ru.yandex.practicum.filmorate.dto.ReviewUpdateRequestDto;
 import ru.yandex.practicum.filmorate.model.Review;
 
 import java.util.Collection;
+import java.util.Set;
 
 public interface ReviewRepository {
 
@@ -27,4 +29,6 @@ public interface ReviewRepository {
     Review addDislike(Long id, Integer userId);
 
     Review removeDislike(Long id, Integer userId);
+
+    Collection<ReviewReactionDto> getReactions(Set<Long> reviewsIds);
 }
