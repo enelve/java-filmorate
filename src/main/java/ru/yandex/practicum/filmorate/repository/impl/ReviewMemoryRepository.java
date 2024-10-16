@@ -3,6 +3,7 @@ package ru.yandex.practicum.filmorate.repository.impl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Repository;
+import ru.yandex.practicum.filmorate.dto.ReviewReactionDto;
 import ru.yandex.practicum.filmorate.dto.ReviewSaveRequestDto;
 import ru.yandex.practicum.filmorate.dto.ReviewUpdateRequestDto;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
@@ -106,6 +107,11 @@ public class ReviewMemoryRepository implements ReviewRepository {
         review.evaluateUseful();
         storage.put(id, new Review(review));
         return review;
+    }
+
+    @Override
+    public Collection<ReviewReactionDto> getReactions(Set<Long> reviewsIds) {
+        return null;
     }
 
     private Long nextId() {
