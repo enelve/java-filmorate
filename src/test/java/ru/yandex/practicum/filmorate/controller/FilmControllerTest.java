@@ -94,4 +94,26 @@ class FilmControllerTest {
                 .andExpect(MockMvcResultMatchers.content()
                         .contentType(MediaType.APPLICATION_JSON));
     }
+
+    @Test
+    void deleteExistingReturnsSuccess() throws Exception {
+        String film = "{\n" +
+                "    \"name\": \"name\",\n" +
+                "    \"description\": \"description\",\n" +
+                "    \"releaseDate\": \"1970-01-01\",\n" +
+                "    \"duration\": 200,\n" +
+                "    \"mpa\": { \"id\": 1}\n" +
+                "}";
+        mockMvc.perform(MockMvcRequestBuilders.post("/films")
+                .content(film)
+                .contentType(MediaType.APPLICATION_JSON));
+        mockMvc.perform(MockMvcRequestBuilders.delete("/films/1"))
+                .andExpect(MockMvcResultMatchers.status().isOk());
+    }
+
+    @Test
+    void deleteNotExistingReturnsNotFound() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.delete("/films/1"))
+                .andExpect(MockMvcResultMatchers.status().isNotFound());
+    }
 }

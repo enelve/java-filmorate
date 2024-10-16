@@ -15,8 +15,8 @@ public class FilmRatingMapper {
 
     public static FilmRating toEntity(FilmRatingDto filmRatingDto) {
         return new FilmRating(
-                filmRatingDto.id(),
-                filmRatingDto.name()
+                filmRatingDto.getId(),
+                filmRatingDto.getName()
         );
     }
 }

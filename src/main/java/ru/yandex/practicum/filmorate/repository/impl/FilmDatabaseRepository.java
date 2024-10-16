@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.repository.impl;
 
+import jakarta.validation.ValidationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -8,7 +9,10 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
+import ru.yandex.practicum.filmorate.mapper.FilmSearchMapper;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.FilmSearch;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.repository.FilmRepository;
 import ru.yandex.practicum.filmorate.repository.mapper.FilmMapper;
@@ -21,10 +25,11 @@ import java.util.*;
 
 @Repository
 @Slf4j
-@Component("FilmDatabaseRepository")
+@Component
 @RequiredArgsConstructor
 public class FilmDatabaseRepository implements FilmRepository {
     private final JdbcTemplate jdbcTemplate;
+    private final DirectorDatabaseRepository directorDatabaseRepository;
 
     @Override
     public Film add(Film film) {
@@ -42,6 +47,8 @@ public class FilmDatabaseRepository implements FilmRepository {
         }, keyHolder);
 
         film.setId(keyHolder.getKey().intValue());
+        List<Director> directors = directorDatabaseRepository.addDirectorInFilm(film.getId(), film.getDirectors());
+        film.setDirectors(directors);
         return film;
     }
 
@@ -51,18 +58,13 @@ public class FilmDatabaseRepository implements FilmRepository {
                 "UPDATE films SET name=?, description=?, release_date=?, duration=?, film_rating_id=? WHERE film_id=?",
                 film.getName(),
                 film.getDescription(),
-                Date.valueOf(film.getReleaseDate()),
+                film.getReleaseDate(),
                 film.getDuration(),
                 film.getFilmRating().getId(),
                 film.getId()
         );
         Film filmFromDB = getById(film.getId());
         return filmFromDB;
-    }
-
-    @Override
-    public Film delete(Integer id) {
-        return null;
     }
 
     @Override
@@ -84,6 +86,11 @@ public class FilmDatabaseRepository implements FilmRepository {
     }
 
     @Override
+    public void delete(Integer id) {
+        jdbcTemplate.update("DELETE FROM films WHERE film_id=?", id);
+    }
+
+    @Override
     public void addGenres(Integer filmId, Set<Genre> genres) {
         for (Genre genre : genres) {
             jdbcTemplate.update("INSERT INTO film_genre (film_id, genre_id) VALUES (?, ?)", filmId, genre.getId());
@@ -93,6 +100,65 @@ public class FilmDatabaseRepository implements FilmRepository {
     @Override
     public void deleteGenres(Integer filmId) {
         jdbcTemplate.update("DELETE FROM film_genre WHERE film_id=?", filmId);
+    }
+
+    @Override
+    public List<Film> getDirectorFilms(int directorId, String sortBy) {
+        String sql;
+        switch (sortBy) {
+            case "year":
+                sql = "SELECT f.*, d.director_id, d.director_name, fg.genre_id, g.genre_type, fr.rating_value FROM film_director fd " +
+                        "JOIN films f ON fd.film_id = f.film_id " +
+                        "JOIN director d ON d.director_id = fd.director_id " +
+                        "LEFT JOIN film_genre fg ON f.film_id = fg.film_id " +
+                        "LEFT JOIN genre g ON fg.genre_id = g.genre_id " +
+                        "LEFT JOIN film_rating fr ON f.FILM_RATING_ID  = fr.FILM_RATING_ID " +
+                        "WHERE fd.director_id = ?" +
+                        "ORDER BY f.release_date";
+                break;
+            case "likes":
+                sql = "SELECT f.* FROM FILMS f \n" +
+                        "  INNER JOIN \n" +
+                        "  (SELECT  d.FILM_ID, COUNT(l.user_id) likes_count FROM FILM_DIRECTOR d\n" +
+                        "  Left JOIN LIKES l\n" +
+                        "  ON l.FILM_ID = d.FILM_ID\n" +
+                        "  WHERE d.DIRECTOR_ID = ?\n" +
+                        "  GROUP BY d.FILM_ID\n" +
+                        "  ) fl\n" +
+                        "  ON f.FILM_ID = fl.FILM_ID\n" +
+                        "  ORDER BY fl.likes_count desc";
+                break;
+            default:
+                log.info("Запрашиваемой сортировки не существует: {}", sortBy);
+                throw new ValidationException("Не корректный параметр сортировки");
+        }
+        return jdbcTemplate.query(sql, new FilmMapper(), directorId);
+    }
+
+    @Override
+    public List<FilmSearch> getFilmBySearch(String query, String by) {
+        StringBuilder sql = new StringBuilder("SELECT f.*, d.*, g.*, fr.RATING_VALUE "
+            + "FROM films f "
+            + "LEFT JOIN likes ml ON f.film_id = ml.film_id "
+            + "LEFT JOIN film_genre fg ON fg.FILM_ID = f.FILM_ID "
+            + "LEFT JOIN genre g ON g.genre_id = fg.GENRE_ID  "
+            + "LEFT JOIN film_director fd ON f.film_id = fd.film_id "
+            + "LEFT JOIN film_rating fr ON fr.film_rating_id = f.film_rating_id "
+            + "LEFT JOIN director d ON fd.director_id = d.director_id ");
+
+        if (by.equals("title")) {
+            sql.append("WHERE LOWER(f.name) LIKE LOWER('%").append(query).append("%') ");
+        }
+        if (by.equals("director")) {
+            sql.append("WHERE LOWER(d.director_name) LIKE LOWER('%").append(query).append("%') ");
+        }
+        if (by.equals("title,director") || by.equals("director,title")) {
+            sql.append("WHERE LOWER(f.name) LIKE LOWER('%").append(query).append("%') ");
+            sql.append("OR LOWER(d.director_name) LIKE LOWER('%").append(query).append("%') ");
+        }
+        sql.append("GROUP BY f.film_id, ml.film_id " + "ORDER BY COUNT(ml.film_id) DESC");
+
+        return jdbcTemplate.query(sql.toString(), new FilmSearchMapper());
     }
 
     @Override

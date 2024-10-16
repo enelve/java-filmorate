@@ -1,5 +1,7 @@
 package ru.yandex.practicum.filmorate.exception;
 
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
@@ -12,7 +14,9 @@ import org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExc
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static org.springframework.http.HttpStatus.*;
 
@@ -43,6 +47,15 @@ public class RestExceptionHandler extends ExceptionHandlerExceptionResolver {
                 .body(response);
     }
 
+    @ExceptionHandler({NotFoundErrorException.class})
+    public ResponseEntity<ErrorResponseNew> handleException(NotFoundErrorException e) {
+        log.error(e.getMessage());
+        ErrorResponseNew response = new ErrorResponseNew(NOT_FOUND.value(), e.getMessage(), LocalDateTime.now());
+        return ResponseEntity
+                .status(NOT_FOUND)
+                .body(response);
+    }
+
     @ExceptionHandler(DuplicateException.class)
     public ResponseEntity<ErrorResponse> handleException(DuplicateException e) {
         log.error(e.getMessage());
@@ -59,5 +72,16 @@ public class RestExceptionHandler extends ExceptionHandlerExceptionResolver {
         return ResponseEntity
                 .status(NO_CONTENT)
                 .body(response);
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<List<String>> handleException(ConstraintViolationException e) {
+        final List<String> errorList = e.getConstraintViolations().stream()
+                .map(ConstraintViolation::getMessage)
+                .collect(Collectors.toList());
+        log.error("onConstraintViolationException. {}", errorList);
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(errorList);
     }
 }

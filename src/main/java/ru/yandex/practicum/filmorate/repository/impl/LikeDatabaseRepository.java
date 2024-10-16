@@ -18,7 +18,7 @@ public class LikeDatabaseRepository implements LikeRepository {
 
     @Override
     public void add(Integer filmId, Integer userId) {
-        jdbcTemplate.update("INSERT INTO likes (film_id, user_id) VALUES (?, ?)", filmId, userId);
+        jdbcTemplate.update("MERGE INTO likes (film_id, user_id) VALUES (?, ?)", filmId, userId);
     }
 
     @Override

@@ -4,17 +4,22 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.enums.EventTypesEnum;
+import ru.yandex.practicum.filmorate.enums.OperationsEnum;
 import ru.yandex.practicum.filmorate.exception.DuplicateException;
+import ru.yandex.practicum.filmorate.exception.NotContentException;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
+import ru.yandex.practicum.filmorate.model.Director;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.FilmSearch;
 import ru.yandex.practicum.filmorate.model.Genre;
-import ru.yandex.practicum.filmorate.repository.FilmRatingRepository;
-import ru.yandex.practicum.filmorate.repository.FilmRepository;
-import ru.yandex.practicum.filmorate.repository.GenreRepository;
-import ru.yandex.practicum.filmorate.repository.LikeRepository;
+import ru.yandex.practicum.filmorate.repository.*;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Predicate;
 
 import static ru.yandex.practicum.filmorate.exception.Error.*;
 
@@ -25,14 +30,19 @@ public class FilmService {
     private final FilmRatingRepository filmRatingRepository;
     private final LikeRepository likeRepository;
     private final GenreRepository genreRepository;
+    private final DirectorRepository directorRepository;
+    private final FeedRepository feedRepository;
+    private static final EventTypesEnum EVENT_TYPES = EventTypesEnum.LIKE;
 
     @Autowired
-    public FilmService(@Qualifier("FilmDatabaseRepository") FilmRepository filmRepository, FilmRatingRepository filmRatingRepository,
-                       LikeRepository likeRepository, GenreRepository genreRepository) {
+    public FilmService(@Qualifier("filmDatabaseRepository") FilmRepository filmRepository, FilmRatingRepository filmRatingRepository,
+                       LikeRepository likeRepository, GenreRepository genreRepository, DirectorRepository directorRepository, FeedRepository feedRepository) {
         this.filmRepository = filmRepository;
         this.filmRatingRepository = filmRatingRepository;
         this.likeRepository = likeRepository;
         this.genreRepository = genreRepository;
+        this.directorRepository = directorRepository;
+        this.feedRepository = feedRepository;
     }
 
     public Film add(Film film) {
@@ -70,6 +80,8 @@ public class FilmService {
         }
         newFilm.setGenres(filmRepository.getGenres(newFilm.getId()));
         newFilm.setFilmRating(filmRatingRepository.getById(newFilm.getFilmRating().getId()));
+        directorRepository.deleteFromFilm(newFilm.getId());
+        newFilm.setDirectors(directorRepository.addDirectorInFilm(newFilm.getId(), film.getDirectors()));
         return newFilm;
     }
 
@@ -81,6 +93,7 @@ public class FilmService {
             for (Genre g : filmRepository.getGenres(f.getId())) {
                 f.getGenres().add(g);
             }
+            f.setDirectors(directorRepository.getDirectorListFromFilm(f.getId()));
         }
         return films;
     }
@@ -94,13 +107,42 @@ public class FilmService {
         for (Genre g : filmRepository.getGenres(film.getId())) {
             film.getGenres().add(g);
         }
+        List<Director> directors = directorRepository.getDirectorListFromFilm(film.getId());
+        if (directors != null && !directors.isEmpty()) {
+            film.setDirectors(directors);
+        } else {
+            film.setDirectors(new ArrayList<>());
+        }
+
         return film;
     }
 
     public Film addLike(Integer filmId, Integer userId) {
         log.info("Пользоателю {} понравился фильм {}.", userId, filmId);
         likeRepository.add(filmId, userId);
+        feedRepository.add(userId,filmId, EVENT_TYPES, OperationsEnum.ADD);
         return filmRepository.getById(filmId);
+    }
+
+    public List<Film> getDirectors(Integer directorId, String sortBy) {
+        if (!directorRepository.exists(directorId)) {
+            throw new NotFoundException(String.format(ERROR_0001.message(), directorId));
+        }
+        directorRepository.findById(directorId);
+        List<Film> films =  filmRepository.getDirectorFilms(directorId, sortBy);
+        films.forEach(film -> {
+            film.setFilmRating(filmRatingRepository.getById(film.getFilmRating().getId()));
+            for (Genre g : filmRepository.getGenres(film.getId())) {
+                film.getGenres().add(g);
+            }
+            List<Director> directors = directorRepository.getDirectorListFromFilm(film.getId());
+            if (directors != null && !directors.isEmpty()) {
+                film.setDirectors(directors);
+            } else {
+                film.setDirectors(new ArrayList<>());
+            }
+        });
+        return films;
     }
 
     public Film deleteLike(Integer filmId, Integer userId) {
@@ -111,13 +153,49 @@ public class FilmService {
             throw new NotFoundException(String.format(ERROR_0003.message(), filmId, userId));
         }
         likeRepository.remove(filmId, userId);
+        feedRepository.add(userId,filmId, EVENT_TYPES, OperationsEnum.REMOVE);
         return filmRepository.getById(filmId);
     }
 
-    public List<Film> getMostPopular(Integer count) {
-        return filmRepository.getAll().stream()
-                .sorted(((o1, o2) -> likeRepository.getCount(o2.getId()) - likeRepository.getCount(o1.getId())))
+    public List<Film> getMostPopularByGenreAndYear(Integer count, Optional<Integer> genreId, Optional<Integer> year) {
+        final Predicate<Film> filmPredicate = film -> {
+            boolean genreMatched = genreId.isEmpty() || film.getGenres().stream().map(Genre::getId)
+                    .anyMatch(id -> id.equals(genreId.get()));
+            boolean yearMatched = year.isEmpty() || year.get().equals(film.getReleaseDate().getYear());
+
+            return genreMatched && yearMatched;
+        };
+
+        return getAll().stream()
+                .filter(filmPredicate)
+                .sorted(((o1, o2) -> -(likeRepository.getCount(o1.getId()) - likeRepository.getCount(o2.getId()))))
                 .limit(count)
+                .toList();
+    }
+
+    public void delete(Integer id) {
+        log.debug("Удаление фильма {}.", id);
+        if (!filmRepository.exists(id)) {
+            log.error("Фильм с Id={} не найден!", id);
+            throw new NotFoundException(String.format(ERROR_0001.message(), id));
+        }
+        filmRepository.delete(id);
+        log.debug("Фильм {} удален.", id);
+    }
+
+    public List<FilmSearch> searchFilms(String query, String by) {
+        if (!(by.contains("title") || by.contains("director") || by.contains("title,director") || by.contains("director,title") || by.contains("unknown"))) {
+            log.info("Некорректное значение выборки поиска в поле BY = {}", by);
+            throw new NotContentException("Некорректное значение выборки поиска");
+        }
+        return filmRepository.getFilmBySearch(query, by);
+    }
+
+    public List<Film> getCommonFilms(Integer userId, Integer friendId) {
+        return getAll().stream()
+                .filter(film -> likeRepository.isFilmLikedByUser(film.getId(), userId) &&
+                        likeRepository.isFilmLikedByUser(film.getId(), friendId))
+                .sorted(((o1, o2) -> likeRepository.getCount(o2.getId()) - likeRepository.getCount(o1.getId())))
                 .toList();
     }
 }

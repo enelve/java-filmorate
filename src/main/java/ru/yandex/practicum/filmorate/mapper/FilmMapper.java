@@ -14,19 +14,21 @@ public class FilmMapper {
                 film.getReleaseDate(),
                 film.getDuration(),
                 film.getFilmRating(),
-                film.getGenres()
+                film.getGenres(),
+                film.getDirectors()
         );
     }
 
     public static Film toEntity(FilmDto filmDto) {
         return new Film(
-                filmDto.id(),
-                filmDto.name(),
-                filmDto.description(),
-                filmDto.releaseDate(),
-                filmDto.duration(),
-                filmDto.filmRating(),
-                filmDto.genres()
+                filmDto.getId(),
+                filmDto.getName(),
+                filmDto.getDescription(),
+                filmDto.getReleaseDate(),
+                filmDto.getDuration(),
+                filmDto.getFilmRating(),
+                filmDto.getGenres(),
+                filmDto.getDirectors()
         );
     }
 }
